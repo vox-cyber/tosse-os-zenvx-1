@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="theme-color" content="#090b10" />
+<title>Tosse OS — Interactive Preview</title>
+<script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<style>
+:root{--bg:#080a0f;--glass:rgba(20,23,31,.72);--glass2:rgba(255,255,255,.07);--line:rgba(255,255,255,.13);--text:#f7f8fb;--muted:#adb3c2;--accent:#7c9cff;--accent2:#bd7cff;--ok:#68d6a2;--warn:#ffcb72;--shadow:0 24px 70px rgba(0,0,0,.45)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#070910;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transparent 34%),radial-gradient(circle at 20% 90%,rgba(189,124,255,.18),transparent 35%),linear-gradient(135deg,#0c111d,#070910 55%,#11101b)}
+.wallpaper{position:fixed;inset:0;overflow:hidden;isolation:isolate}.orb{position:absolute;border-radius:50%;filter:blur(2px);opacity:.9}.o1{width:48vw;height:48vw;right:-12vw;top:-24vw;background:radial-gradient(circle at 35% 65%,rgba(137,172,255,.64),rgba(90,67,203,.08) 62%,transparent 70%)}.o2{width:43vw;height:43vw;left:-18vw;bottom:-25vw;background:radial-gradient(circle at 65% 35%,rgba(198,107,255,.42),rgba(50,39,124,.05) 64%,transparent 72%)}.noise{position:absolute;inset:0;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E")}
+.topbar{height:42px;position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(8,10,15,.54);border-bottom:1px solid rgba(255,255,255,.09);backdrop-filter:blur(22px);font-size:13px}.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:.2px}.logo{width:22px;height:22px;border-radius:7px;background:linear-gradient(140deg,#8caaff,#b980ff);display:grid;place-items:center;box-shadow:0 0 22px rgba(140,170,255,.42)}.logo svg{width:14px}.status{display:flex;align-items:center;gap:13px;color:#e4e6ed}.status svg{width:16px;height:16px}.clock{font-variant-numeric:tabular-nums}
+.desktop{position:relative;z-index:2;height:calc(100% - 42px);padding:24px;display:grid;grid-template-columns:94px 1fr;gap:28px}.icons{display:flex;flex-direction:column;gap:16px}.desktop-icon{width:72px;border:0;background:transparent;color:#f7f8fb;padding:7px 4px;border-radius:10px;cursor:pointer;text-align:center;font-size:12px;text-shadow:0 1px 4px #000}.desktop-icon:hover,.desktop-icon:focus-visible{background:rgba(255,255,255,.09);outline:none}.icon-tile{width:46px;height:46px;margin:0 auto 5px;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 20px rgba(0,0,0,.2)}.icon-tile svg{width:24px;height:24px}
+.stage{display:flex;align-items:center;justify-content:center;padding-bottom:54px}.welcome{width:min(790px,80vw);display:grid;grid-template-columns:1.25fr .75fr;overflow:hidden;border:1px solid var(--line);border-radius:22px;background:rgba(14,17,25,.66);backdrop-filter:blur(28px) saturate(130%);box-shadow:var(--shadow)}.hero{padding:42px}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:#cdd5ff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}h1{font-size:clamp(38px,5vw,62px);line-height:.97;letter-spacing:-.055em;margin:14px 0 18px;max-width:540px}h1 span{background:linear-gradient(100deg,#fff 22%,#9fb5ff 62%,#d79dff);-webkit-background-clip:text;background-clip:text;color:transparent}.subtitle{color:var(--muted);font-size:16px;line-height:1.6;max-width:520px;margin:0 0 28px}.actions{display:flex;gap:12px;flex-wrap:wrap}.primary,.secondary{min-height:44px;border-radius:11px;padding:0 17px;border:1px solid transparent;cursor:pointer;font-weight:700}.primary{color:#0b0c11;background:#f6f7fb;box-shadow:0 8px 24px rgba(255,255,255,.13)}.primary:hover{background:#fff;transform:translateY(-1px)}.secondary{color:#f2f3f7;background:rgba(255,255,255,.06);border-color:var(--line)}.secondary:hover{background:rgba(255,255,255,.1)}.quick{padding:24px;border-left:1px solid var(--line);background:rgba(255,255,255,.025);display:flex;flex-direction:column;justify-content:center;gap:10px}.quick h2{font-size:13px;margin:0 0 6px;color:var(--muted);font-weight:600}.feature{display:flex;gap:12px;padding:13px;border:1px solid transparent;border-radius:12px;background:transparent;color:inherit;text-align:left;cursor:pointer}.feature:hover,.feature:focus-visible{border-color:var(--line);background:rgba(255,255,255,.055);outline:none}.ficon{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(124,156,255,.14);color:#b8c7ff}.ficon svg{width:18px}.feature strong{display:block;font-size:13px}.feature small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.35}
+.dockwrap{position:fixed;z-index:30;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px}.dock{display:flex;gap:7px;padding:8px;background:rgba(15,17,24,.72);border:1px solid var(--line);border-radius:17px;backdrop-filter:blur(24px);box-shadow:0 14px 40px rgba(0,0,0,.38)}.dock button{width:46px;height:46px;border:0;border-radius:12px;color:white;background:rgba(255,255,255,.07);cursor:pointer;display:grid;place-items:center;position:relative}.dock button:hover,.dock button:focus-visible{background:rgba(255,255,255,.14);transform:translateY(-3px);outline:none}.dock svg{width:23px}.dock .active:after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:#fff}
+.panel{position:fixed;z-index:40;left:50%;bottom:84px;transform:translate(-50%,14px) scale(.98);width:min(630px,calc(100vw - 28px));opacity:0;pointer-events:none;transition:.2s ease;border:1px solid var(--line);border-radius:20px;background:rgba(16,18,26,.82);backdrop-filter:blur(30px) saturate(140%);box-shadow:var(--shadow);padding:18px}.panel.open{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.search{display:flex;align-items:center;gap:11px;height:49px;border:1px solid rgba(255,255,255,.16);border-radius:13px;padding:0 14px;background:rgba(255,255,255,.06)}.search svg{width:19px;color:#aeb8d6}.search input{width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:15px}.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;max-height:272px;overflow:auto;padding-right:2px}.app{border:0;color:#fff;background:transparent;border-radius:12px;padding:12px 7px;cursor:pointer}.app:hover{background:rgba(255,255,255,.07)}.app .mini{width:38px;height:38px;margin:0 auto 7px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(124,156,255,.45),rgba(189,124,255,.26));border:1px solid rgba(255,255,255,.16)}.app svg{width:20px}.app span{font-size:12px}
+.voice{position:fixed;z-index:50;inset:0;display:flex;overflow:auto;overscroll-behavior:contain;background:rgba(4,5,9,.58);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .25s}.voice.open{opacity:1;pointer-events:auto}.voicebox{text-align:center;width:min(520px,90vw);padding:36px;margin:auto}.rings{width:128px;height:128px;margin:0 auto 28px;position:relative;display:grid;place-items:center;pointer-events:none}.rings:before,.rings:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(145,174,255,.45);inset:0;animation:pulse 2s infinite}.rings:after{inset:16px;animation-delay:.5s}.mic{width:70px;height:70px;border:0;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,#6f91ff,#a76eff);box-shadow:0 0 45px rgba(124,156,255,.48);cursor:pointer;pointer-events:auto;position:relative;z-index:1}.mic svg{width:28px}.voice h2{font-size:27px;margin:0 0 8px}.voice p{color:var(--muted);margin:0}.chips{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:24px}.chip{border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.05);color:#dfe3ed;font-size:12px;cursor:pointer}.chip:hover{background:rgba(255,255,255,.1)}.close{position:absolute;top:22px;right:22px;width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,.06);color:white;cursor:pointer;font-size:20px}
+.toast{position:fixed;z-index:70;top:57px;right:16px;width:min(340px,calc(100vw - 32px));padding:15px;border-radius:13px;background:rgba(22,25,34,.88);border:1px solid var(--line);backdrop-filter:blur(20px);box-shadow:var(--shadow);transform:translateX(110%);transition:.28s}.toast.show{transform:translateX(0)}.toast strong{font-size:13px}.toast p{font-size:12px;color:var(--muted);margin:5px 0 0}.gesture{position:fixed;z-index:45;right:18px;bottom:92px;width:304px;padding:16px;border-radius:16px;background:rgba(17,20,28,.9);border:1px solid var(--line);backdrop-filter:blur(22px);box-shadow:var(--shadow);display:none}.gesture.open{display:block}.gesturehead{display:flex;align-items:center;justify-content:space-between}.gesture h3{font-size:14px;margin:0}.badge{font-size:10px;color:#b9f0d2;background:rgba(104,214,162,.12);padding:4px 7px;border-radius:999px;letter-spacing:.04em}.camview{position:relative;height:148px;margin:13px 0 11px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#05060d}.camview video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}.camoff{position:absolute;inset:0;display:grid;place-items:center;padding:14px;text-align:center;color:var(--muted);font-size:11px;line-height:1.55;background:radial-gradient(circle,rgba(124,156,255,.13),transparent 70%)}.camview.live .camoff{display:none}.gstatus{display:flex;align-items:center;gap:8px;font-size:11px;color:#cdd3e1;margin:0 0 11px;min-height:15px}.gdot{width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 9px rgba(255,203,114,.55);flex:0 0 auto;transition:.3s}.gdot.on{background:var(--ok);box-shadow:0 0 12px var(--ok)}.gdot.err{background:#ff7a7a;box-shadow:0 0 10px rgba(255,122,122,.6)}.gactions{display:flex;gap:8px;margin-bottom:12px}.gbtn{flex:1;min-height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;font-size:12px;font-weight:700;cursor:pointer}.gbtn:hover{background:rgba(255,255,255,.13)}.gbtn.primary{background:#f6f7fb;color:#0b0c11;border-color:transparent}.gbtn.primary:hover{background:#fff}.gbtn:disabled{opacity:.55;cursor:wait}.guide{list-style:none;margin:0;padding:0;display:grid;gap:8px}.guide li{display:block;font-size:11px;color:var(--muted);line-height:1.4}.guide svg{width:15px;height:15px;color:#b8c7ff;flex:0 0 auto}.guide i{font-style:normal;margin-right:2px}.guide b{color:#e9ecf4;font-weight:600}.shortcut{position:fixed;left:16px;bottom:18px;z-index:20;color:rgba(255,255,255,.58);font-size:11px}.kbd{border:1px solid rgba(255,255,255,.16);border-bottom-width:2px;padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.05)}
+@keyframes pulse{0%{transform:scale(.82);opacity:0}40%{opacity:1}100%{transform:scale(1.22);opacity:0}}@keyframes float{50%{transform:translateY(-7px) rotate(4deg)}}
+.micstate{margin-top:14px;display:inline-flex;align-items:center;gap:8px;color:#cdd3e1;font-size:12px}.micstate .dot{background:var(--warn);box-shadow:none}.micstate.live .dot{background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.pointer{position:fixed;z-index:200;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid #8fb0ff;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .2s,border-color .15s,box-shadow .15s;box-shadow:0 0 16px rgba(124,156,255,.7),inset 0 0 8px rgba(124,156,255,.4);will-change:transform}.pointer:after{content:"";position:absolute;inset:8px;border-radius:50%;background:#fff;box-shadow:0 0 6px #fff}.pointer.on{opacity:1}.pointer.pinch{border-color:var(--ok);box-shadow:0 0 22px rgba(104,214,162,.9),inset 0 0 8px rgba(104,214,162,.5)}.pointer.paused{border-color:var(--warn);box-shadow:0 0 18px rgba(255,203,114,.8),inset 0 0 8px rgba(255,203,114,.4)}.ripple{position:fixed;z-index:199;width:10px;height:10px;margin:-5px 0 0 -5px;border:2px solid #fff;border-radius:50%;pointer-events:none;animation:rip .45s ease-out forwards}@keyframes rip{to{width:64px;height:64px;margin:-32px 0 0 -32px;opacity:0}}#camghost{position:fixed;inset:0;z-index:3;pointer-events:none;display:none;opacity:.14;transform:scaleX(-1)}#camghost.on{display:block}#camghost video{width:100%;height:100%;object-fit:cover;display:block}#gtag{position:fixed;z-index:201;left:0;top:0;pointer-events:none;display:none;white-space:nowrap;padding:4px 11px;border-radius:99px;font-size:11.5px;font-weight:700;letter-spacing:.02em;color:#eaf0ff;background:rgba(9,11,20,.82);border:1px solid rgba(143,176,255,.4);backdrop-filter:blur(8px);transform:translate(-50%,-190%)}#gtag.on{display:block}#skel{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none}.camview.live #skel{display:block}#heard{position:fixed;left:50%;bottom:104px;transform:translateX(-50%);z-index:198;max-width:min(560px,86vw);display:none;padding:9px 16px;border-radius:12px;font-size:13.5px;line-height:1.35;color:#dfe6f7;background:rgba(9,11,20,.86);border:1px solid rgba(255,255,255,.13);backdrop-filter:blur(14px);box-shadow:0 12px 34px rgba(0,0,0,.42)}#heard.on{display:block}#heard.final{color:#fff;border-color:rgba(143,176,255,.5)}#osd{position:fixed;left:50%;top:78px;transform:translateX(-50%);z-index:202;display:none;min-width:210px;padding:16px 18px;border-radius:16px;text-align:center;background:rgba(9,11,20,.88);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(16px);box-shadow:0 18px 48px rgba(0,0,0,.5)}#osd.show{display:block}#osd .osdlabel{font-size:13px;font-weight:700;color:#fff;margin-bottom:9px}#osd .osdbar{height:6px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}#osd .osdfill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#8fb0ff,#c9b6ff);transition:width .18s}.poserow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:7px 11px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:11.5px;color:rgba(255,255,255,.62)}.poserow b{color:#fff;font-size:12px;font-weight:700;text-transform:capitalize}#wakeToggle{display:block;width:100%;margin:9px 0 0;padding:7px 12px;border-radius:9px;cursor:pointer;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.72);background:rgba(255,255,255,.06);border:1px solid var(--line);text-align:center}#wakeToggle:hover{color:#fff;background:rgba(255,255,255,.12)}.gactions{flex-wrap:wrap}.gbtn.wide{flex:1 1 100%}.ghover{outline:2px solid rgba(143,176,255,.85)!important;outline-offset:2px}.ws{display:flex;align-items:center;gap:6px;font-size:12px}.wsdot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}.windows{position:fixed;inset:0;z-index:15;pointer-events:none}.win{position:absolute;pointer-events:auto;border-radius:14px;overflow:hidden;background:rgba(14,16,26,.95);border:1px solid rgba(255,255,255,.12);box-shadow:0 26px 70px rgba(0,0,0,.6);backdrop-filter:blur(18px);display:flex;flex-direction:column}.wbar{display:flex;align-items:center;gap:9px;padding:9px 11px;cursor:grab;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.09);touch-action:none}.wbar.grabbing{cursor:grabbing}.wbar h4{margin:0;font-size:12.5px;font-weight:700;color:#fff;flex:1}.wdot{width:9px;height:9px;border-radius:50%;background:var(--accent,#7c9cff);flex:0 0 auto}.wclose{width:22px;height:22px;border-radius:6px;border:none;cursor:pointer;font-size:15px;line-height:1;background:rgba(255,255,255,.09);color:#fff}.wclose:hover{background:#ff5f57;color:#fff}.wbody{padding:14px;overflow:auto;max-height:min(64vh,540px);font-size:12.5px;color:#e6e9f2}.wnote{margin:12px 0 0;font-size:10.5px;line-height:1.45;color:rgba(255,255,255,.45)}.wsub{margin:2px 0 0;font-size:11px;color:rgba(255,255,255,.55)}.wbtn{padding:7px 13px;border-radius:9px;cursor:pointer;font-size:11.5px;font-weight:700;color:#fff;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14)}.wbtn:hover{background:rgba(255,255,255,.17)}.wbtn:disabled{opacity:.5;cursor:default}.calc output{display:block;padding:12px 14px;margin-bottom:11px;border-radius:11px;text-align:right;font-size:27px;font-weight:700;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.09);overflow:hidden;text-overflow:ellipsis}.calcpad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.ckey{height:42px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}.ckey:hover{background:rgba(255,255,255,.16)}.ckey.op{background:rgba(124,156,255,.24);border-color:rgba(124,156,255,.4)}.ckey.eq{background:#7c9cff;color:#0b0c11;border-color:transparent;grid-column:span 2}.ckey.zero{grid-column:span 1}.music{text-align:center}.music .art{width:132px;height:132px;margin:0 auto 13px;border-radius:50%;box-shadow:0 12px 34px rgba(0,0,0,.5),inset 0 0 0 8px rgba(0,0,0,.28)}.music .art.spin{animation:spin 7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.music h3{margin:0;font-size:15px}.seek{height:5px;border-radius:99px;background:rgba(255,255,255,.14);margin:14px 0 5px;overflow:hidden}.seek span{display:block;height:100%;border-radius:99px;background:var(--accent,#7c9cff);transition:width .4s linear}.times{display:flex;justify-content:space-between;font-size:10.5px;color:rgba(255,255,255,.5)}.mctl{display:flex;align-items:center;justify-content:center;gap:13px;margin-top:13px}.mctl button{width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:12px;color:#fff;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14)}.mctl button.big{width:50px;height:50px;background:#7c9cff;color:#0b0c11;border-color:transparent}.mctl button{display:grid;place-items:center}.mctl button svg{width:15px;height:15px}.mctl button.big svg{width:19px;height:19px}.wtop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.weather h3{margin:0;font-size:16px}.wnow{display:flex;align-items:center;gap:9px}.wnow span{font-size:30px}.wnow strong{font-size:31px}.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}.wgrid div{padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}.wgrid small{display:block;font-size:9.5px;color:rgba(255,255,255,.5);margin-bottom:3px}.wgrid b{font-size:13px}.wcast{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:13px;text-align:center}.wcast div{padding:9px 4px;border-radius:10px;background:rgba(255,255,255,.05)}.wcast small{display:block;font-size:9.5px;color:rgba(255,255,255,.5)}.wcast span{display:block;font-size:17px;margin:3px 0}.wcast b{font-size:12px}.fpath{padding:7px 11px;margin-bottom:9px;border-radius:8px;font-size:11px;background:rgba(0,0,0,.3);color:rgba(255,255,255,.6);font-family:ui-monospace,monospace}.flist{list-style:none;margin:0;padding:0;display:grid;gap:3px}.flist button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:8px;cursor:pointer;text-align:left;font-size:12px;color:#e6e9f2;background:transparent;border:none}.flist button:hover{background:rgba(255,255,255,.09)}.flist .fn{flex:1}.flist small{color:rgba(255,255,255,.42);font-size:10.5px}.notes textarea{width:100%;min-height:190px;padding:12px;border-radius:10px;resize:vertical;font-size:12.5px;line-height:1.55;color:#e6e9f2;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);font-family:inherit}.nrow{display:flex;align-items:center;justify-content:space-between;margin-top:9px}.term{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px}.tout{height:200px;overflow:auto;padding:11px;border-radius:10px;background:#05060c;border:1px solid rgba(255,255,255,.09);line-height:1.6}.tout .dim{color:rgba(255,255,255,.45)}.tout .echo{color:#8fb0ff}.tout .err{color:#ff8f8f}.tin{display:flex;align-items:center;gap:7px;margin-top:9px;padding:8px 11px;border-radius:9px;background:#05060c;border:1px solid rgba(255,255,255,.09)}.tin span{color:#7cffa3;flex:0 0 auto}.tin input{flex:1;background:transparent;border:none;outline:none;color:#e6e9f2;font:inherit}.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ph{aspect-ratio:1;border-radius:10px;border:none;cursor:pointer;transition:transform .18s}.ph:hover{transform:scale(1.04)}.ph.zoom{grid-column:span 2;grid-row:span 2}.mail{display:grid;grid-template-columns:180px 1fr;gap:11px}.mlist{list-style:none;margin:0;padding:0;display:grid;gap:3px}.mlist button{display:block;width:100%;padding:8px 9px;border-radius:8px;cursor:pointer;text-align:left;background:transparent;border:none;color:#e6e9f2}.mlist button:hover,.mlist button.on{background:rgba(124,156,255,.19)}.mlist b{display:block;font-size:11.5px}.mlist span{display:block;font-size:10.5px;color:rgba(255,255,255,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mread{padding:11px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}.mread h4{margin:0 0 2px;font-size:13px}.mread p{margin:8px 0 0;line-height:1.55}.setts{display:grid;gap:9px}.srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer}.srow input[type=range]{width:130px;accent-color:var(--accent,#7c9cff)}.srow input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent,#7c9cff)}.segs{display:flex;gap:5px}.segs button{width:30px;height:28px;border-radius:8px;cursor:pointer;font-size:11.5px;font-weight:700;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}.segs button.on{background:#7c9cff;color:#0b0c11;border-color:transparent}.swatches{display:flex;gap:6px}.swatches button{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,.25)}.focus{text-align:center;padding:14px 0}.ftime{font-size:52px;font-weight:800;letter-spacing:-.02em}.fctl{display:flex;gap:9px;justify-content:center;margin:15px 0 11px}.plist{list-style:none;margin:0 0 13px;padding:0;display:grid;gap:5px}.plist li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border-radius:9px;background:rgba(255,255,255,.05);font-size:11.5px}.plist b{color:rgba(255,255,255,.55);font-size:11px}.plist b.live{color:#7cffa3}.burl{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:99px;margin-bottom:11px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1)}.burl input{flex:1;background:transparent;border:none;outline:none;color:#e6e9f2;font:inherit;font-size:11.5px}.bpage{padding:13px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}.bpage h4{margin:0;font-size:14px}.bpage p{margin:8px 0 0;line-height:1.55}.store{list-style:none;margin:0;padding:0;display:grid;gap:6px}.store li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}.store b{display:block;font-size:12px}.store small{display:block;font-size:10.5px;color:rgba(255,255,255,.5)}.wave{width:100%;height:170px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.09)}.vdiag{display:none;margin:9px auto 0;max-width:430px;padding:8px 13px;border-radius:10px;font-size:11.5px;line-height:1.45;color:#ffd9a8;background:rgba(255,170,70,.12);border:1px solid rgba(255,170,70,.3)}.vdiag.on{display:block}body.a11y-large{font-size:17.5px}body.a11y-contrast .win,body.a11y-contrast .panel,body.a11y-contrast .gesture{background:#04050a;border-color:#fff}body.a11y-contrast{--muted:#dfe4f5}body.a11y-motion *{animation:none!important;transition:none!important}body.a11y-underline button,body.a11y-underline a{text-decoration:underline}@media (max-width:760px){.win{left:8px!important;width:calc(100vw - 16px)!important}.mail{grid-template-columns:1fr}.wgrid{grid-template-columns:repeat(2,1fr)}}.vtoggles{display:flex;gap:7px;justify-content:center;margin:9px 0 0;flex-wrap:wrap}.vtoggles button{padding:7px 13px;border-radius:9px;cursor:pointer;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.72);background:rgba(255,255,255,.06);border:1px solid var(--line)}.vtoggles button:hover{color:#fff;background:rgba(255,255,255,.13)}.vdpanel{display:none;margin:11px auto 0;max-width:430px;padding:12px 14px;border-radius:12px;text-align:left;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.12)}.vdpanel.on{display:block}.vdrow{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:11.5px;color:rgba(255,255,255,.55);border-bottom:1px solid rgba(255,255,255,.06)}.vdrow span:first-child{flex:0 0 96px}.vdrow b{margin-left:auto;color:#fff;font-size:11.5px;font-weight:700;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}.vdmeter{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden;min-width:60px}.vdmeter i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#7cffa3,#ffd24f,#ff6b6b)}#vdCopy{width:100%;margin-top:11px}#vdLast,#vdErr{white-space:normal;overflow:visible;text-overflow:clip;max-width:250px;line-height:1.35}/* the floating transcript chip would land on the panel's own controls, and the panel already reports the same thing */.voice.open ~ #heard{display:none!important}[hidden]{display:none!important}.sensor{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.09em;color:#ffb4b4;font-weight:700}.recdot{width:8px;height:8px;border-radius:50%;background:#ff5f5f;box-shadow:0 0 10px #ff5f5f;animation:blink 1.4s infinite}@keyframes blink{50%{opacity:.35}}body[data-ws="1"]{--accent:#5fe3b3;--accent2:#7cd4ff}body[data-ws="1"] .o1{background:radial-gradient(circle at 35% 65%,rgba(95,227,179,.5),rgba(20,120,90,.08) 62%,transparent 70%)}body[data-ws="1"] .o2{background:radial-gradient(circle at 65% 35%,rgba(124,212,255,.38),rgba(20,60,120,.05) 64%,transparent 72%)}body[data-ws="2"]{--accent:#ffb36b;--accent2:#ff7cb0}body[data-ws="2"] .o1{background:radial-gradient(circle at 35% 65%,rgba(255,179,107,.5),rgba(140,70,20,.08) 62%,transparent 70%)}body[data-ws="2"] .o2{background:radial-gradient(circle at 65% 35%,rgba(255,124,176,.4),rgba(120,25,60,.05) 64%,transparent 72%)}
+.boot[hidden]{display:none}.boot{position:fixed;z-index:300;inset:0;display:grid;place-items:center;background:rgba(5,6,10,.72);backdrop-filter:blur(18px);transition:opacity .32s;padding:20px}.boot.hide{opacity:0;pointer-events:none}.bootcard{width:min(470px,94vw);padding:30px;border-radius:22px;border:1px solid var(--line);background:rgba(16,18,26,.92);box-shadow:var(--shadow);text-align:center}.bootlogo{width:52px;height:52px;margin:0 auto 16px;border-radius:15px;background:linear-gradient(140deg,#8caaff,#b980ff);display:grid;place-items:center;box-shadow:0 0 34px rgba(140,170,255,.42)}.bootlogo svg{width:28px}.bootcard h2{margin:0 0 8px;font-size:24px;letter-spacing:-.02em}.bootcard>p{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 20px}.bootcard>p b{color:#dfe3f0}.sensors{display:grid;gap:10px;margin-bottom:16px}.sensorbtn{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;text-align:left;font-size:13px;width:100%}.sensorbtn:hover{background:rgba(255,255,255,.09)}.sensorbtn .sic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:rgba(124,156,255,.14);color:#b8c7ff;flex:0 0 auto}.sensorbtn .sic svg{width:19px;height:19px}.sensorbtn strong{display:block}.sensorbtn small{display:block;color:var(--muted);font-size:11px;margin-top:2px}.sensorbtn .st{margin-left:auto;font-size:11px;color:var(--muted);flex:0 0 auto;font-weight:700}.sensorbtn.on{border-color:rgba(104,214,162,.5);background:rgba(104,214,162,.08)}.sensorbtn.on .st{color:var(--ok)}.bootenter{width:100%;min-height:46px;border-radius:12px;border:0;background:#f6f7fb;color:#0b0c11;font-weight:700;cursor:pointer;font-size:14px}.bootenter:hover{background:#fff}.bootnote{margin:14px 0 0;font-size:11px;color:var(--muted);line-height:1.5}.bootenter:disabled{opacity:.62;cursor:default}.boothint{margin:12px 0 0;font-size:11.5px;line-height:1.5;color:#b9c4de}.boothint.warn{color:#ffcb72}.bootskip{margin:11px 0 0;padding:0;border:0;background:none;cursor:pointer;font:inherit;font-size:11.5px;font-weight:600;color:var(--muted);text-decoration:underline}.bootskip:hover{color:#fff}.sensorbtn.blocked{border-color:rgba(255,143,143,.45);background:rgba(255,143,143,.07)}.sensorbtn.blocked .st{color:#ff9f9f}.sensorbtn.busy .st{color:#ffcb72}
+.enginestate{margin:9px auto 0;display:inline-block;font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;background:none;border:0;cursor:pointer;padding:3px 8px;border-radius:7px}.enginestate:hover{background:rgba(255,255,255,.07);color:#dfe3f0}.vcmd{margin:16px auto 0;display:flex;align-items:center;gap:9px;width:min(360px,100%);height:43px;border:1px solid var(--line);border-radius:11px;padding:0 12px;background:rgba(255,255,255,.06)}.vcmd:focus-within{border-color:rgba(143,176,255,.6)}.vcmd svg{width:16px;color:#aeb8d6;flex:0 0 auto}.vcmd input{width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:13px}
+@media(max-width:760px){.desktop{display:block;padding:14px}.icons{display:none}.stage{height:100%;padding:0 0 72px}.welcome{width:100%;display:block;max-height:calc(100vh - 150px);overflow:auto}.hero{padding:28px 24px 22px}.quick{border-left:0;border-top:1px solid var(--line);padding:16px}.quick h2{display:none}.feature{padding:10px}.topbar{padding:0 12px}.status .hide-m{display:none}.shortcut{display:none}.dock button{width:44px;height:44px}.dockwrap{bottom:10px}.dock{padding:7px}.apps{grid-template-columns:repeat(3,1fr)}h1{font-size:42px}.subtitle{font-size:14px}.gesture{left:14px;right:14px;bottom:78px;width:auto}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wallpaper" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="noise"></div></div>
+<div id="boot" class="boot" hidden><div class="bootcard"><span class="bootlogo"><svg viewBox="0 0 24 24" fill="none"><path d="M6 7l6 11 6-11M8.5 7h7" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h2>Welcome to Tosse OS</h2><p>Tosse OS needs your <b>microphone</b> for voice commands and your <b>camera</b> for touch-free hand tracking. <span id="bootAsk">Your browser is asking for both right now — choose <b>Allow</b>.</span> Everything runs on-device; nothing is uploaded.</p><div class="sensors"><button id="bootMic" class="sensorbtn" type="button"><span class="sic"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="3" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>Voice control</strong><small>&ldquo;Open launcher&rdquo; · &ldquo;Next workspace&rdquo; · &ldquo;Help&rdquo;</small></span><span class="st">Off</span></button><button id="bootCam" class="sensorbtn" type="button"><span class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12V6.5a1.5 1.5 0 013 0V11m0-5.5a1.5 1.5 0 013 0V11m0-4.5a1.5 1.5 0 013 0V12m0-3.5a1.5 1.5 0 013 0V15c0 3.2-2.5 5.5-5.6 5.5H11c-2 0-3.5-1.1-4.6-2.7L4 14.4A1.5 1.5 0 016.4 13L8 15"/></svg></span><span><strong>Hand gestures</strong><small>Point to move · pinch to click · swipe workspaces</small></span><span class="st">Off</span></button></div><button id="bootEnter" class="bootenter" type="button">Allow microphone &amp; camera</button><p id="bootHint" class="boothint">Waiting for your answer to the browser prompt.</p><button id="bootSkip" class="bootskip" type="button">Continue without them</button><div class="bootnote">Arrow keys + Enter always work without either sensor. You can turn them on later from the Eva overlay or the Gestures panel.</div></div></div>
+<header class="topbar"><div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M6 7l6 11 6-11M8.5 7h7" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tosse OS</div><div class="status"><span class="sensor" id="micLive" hidden><span class="recdot"></span>MIC</span><span class="sensor" id="camLive" hidden><span class="recdot"></span>CAM</span><span class="ws hide-m"><span class="wsdot"></span><span id="wsName">Workspace 1</span></span><span class="hide-m">Preview Mode</span><svg viewBox="0 0 24 24" fill="none"><path d="M4 9a12 12 0 0116 0M7 12a8 8 0 0110 0M10 15a4 4 0 014 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="18" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h12v9H5zM19 11v3" stroke="currentColor" stroke-width="1.7"/><path d="M7 10h7v5H7z" fill="currentColor"/></svg><span id="clock" class="clock">15:00</span></div></header>
+<main class="desktop">
+<nav class="icons" aria-label="Desktop shortcuts">
+<button class="desktop-icon" data-app="Files"><span class="icon-tile"><svg viewBox="0 0 24 24" fill="none"><path d="M3.5 6.5h6l2 2h9v10h-17z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>Files</button>
+<button class="desktop-icon" data-action="gesture"><span class="icon-tile"><svg viewBox="0 0 24 24" fill="none"><path d="M8 12V6.5a1.5 1.5 0 013 0V11m0-5.5a1.5 1.5 0 013 0V11m0-4.5a1.5 1.5 0 013 0V12m0-3.5a1.5 1.5 0 013 0V15c0 3.2-2.5 5.5-5.6 5.5H11c-2 0-3.5-1.1-4.6-2.7L4 14.4A1.5 1.5 0 016.4 13L8 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Gestures</button>
+<button class="desktop-icon" data-app="Settings"><span class="icon-tile"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M19 12a7 7 0 00-.1-1l2-1.5-2-3.4-2.4 1A8 8 0 0014.8 6l-.3-2.6h-4L10.2 6a8 8 0 00-1.7 1L6.1 6.1l-2 3.4 2 1.5a7 7 0 000 2L4 14.5l2 3.4 2.4-1a8 8 0 001.7 1l.3 2.6h4l.3-2.6a8 8 0 001.7-1l2.4 1 2-3.4-2-1.5a7 7 0 00.1-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></span>Settings</button>
+</nav>
+<section class="stage">
+<article class="welcome"><div class="hero"><div class="eyebrow"><span class="dot"></span>Concept experience · v0.1</div><h1>Computing that <span>listens & moves</span> with you.</h1><p class="subtitle">Meet Tosse OS — a Zorin-based desktop concept designed around natural voice, touch-free gestures, accessibility, and privacy-first control.</p><div class="actions"><button class="primary" data-action="voice">Try “Hey Eva”</button><button class="secondary" data-action="launcher">Explore the desktop</button></div></div><aside class="quick"><h2>Experience the highlights</h2>
+<button class="feature" data-action="voice"><span class="ficon"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="3" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>Voice-first assistant</strong><small>Launch, search and control in natural language.</small></span></button>
+<button class="feature" data-action="gesture"><span class="ficon"><svg viewBox="0 0 24 24" fill="none"><path d="M8 12V6.5a1.5 1.5 0 013 0V11m0-5.5a1.5 1.5 0 013 0V11m0-4.5a1.5 1.5 0 013 0V12m0-3.5a1.5 1.5 0 013 0V15c0 3.2-2.5 5.5-5.6 5.5H11c-2 0-3.5-1.1-4.6-2.7L4 14.4A1.5 1.5 0 016.4 13L8 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span><span><strong>Touch-free gestures</strong><small>Navigate, present and play without touching.</small></span></button>
+<button class="feature" data-app="Privacy"><span class="ficon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.8-2.9 8.1-7 10-4.1-1.9-7-5.2-7-10V6z" stroke="currentColor" stroke-width="1.7"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>Private by design</strong><small>Clear sensor states and on-device-first choices.</small></span></button>
+</aside></article>
+</section></main>
+<div class="shortcut">Press <span class="kbd">Space</span> for Eva · <span class="kbd">G</span> for gestures · <span class="kbd">←→↑↓</span> + <span class="kbd">Enter</span> to point & click</div>
+<div class="dockwrap"><nav class="dock" aria-label="App dock">
+<button aria-label="App launcher" data-action="launcher"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="6" height="6" rx="1.5" fill="currentColor" opacity=".65"/><rect x="4" y="14" width="6" height="6" rx="1.5" fill="currentColor" opacity=".65"/><rect x="14" y="14" width="6" height="6" rx="1.5" fill="currentColor"/></svg></button>
+<button class="active" aria-label="Eva assistant" data-action="voice"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12c2.1 0 2.1-5 4.2-5s2.1 10 4.2 10 2.1-7 4.2-7c.8 0 1.4.8 1.9 1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+<button aria-label="Browser" data-app="Browser"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M3.8 12h16.4M12 3.5c2 2.3 3 5.1 3 8.5s-1 6.2-3 8.5c-2-2.3-3-5.1-3-8.5s1-6.2 3-8.5z" stroke="currentColor" stroke-width="1.4"/></svg></button>
+<button aria-label="Gesture control" data-action="gesture"><svg viewBox="0 0 24 24" fill="none"><path d="M8 12V6.5a1.5 1.5 0 013 0V11m0-5.5a1.5 1.5 0 013 0V11m0-4.5a1.5 1.5 0 013 0V12m0-3.5a1.5 1.5 0 013 0V15c0 3.2-2.5 5.5-5.6 5.5H11c-2 0-3.5-1.1-4.6-2.7L4 14.4A1.5 1.5 0 016.4 13L8 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+</nav></div>
+<section id="launcher" class="panel" aria-label="Application launcher"><label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr">Search apps</span><input id="appSearch" placeholder="Search apps, settings or ask Eva…" /></label><div class="apps" id="apps"></div></section>
+<section id="voice" class="voice" aria-label="Eva voice assistant"><button class="close" data-close="voice" aria-label="Close">×</button><div class="voicebox"><div class="rings"><button id="voiceMic" class="mic" aria-label="Enable microphone"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="3" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.9"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button></div><h2 id="voiceTitle">I’m listening.</h2><p id="voiceText">Tap the mic and speak — say &ldquo;help&rdquo; for commands.</p><div id="micState" class="micstate"><span class="dot"></span><span>Microphone off</span></div><button id="engineBtn" class="enginestate" type="button" title="Tap to switch voice engine">Voice engine: off</button><p id="voiceDiag" class="vdiag"></p><div class="vtoggles"><button id="speakToggle" type="button">Eva speaks back: on</button><button id="vdToggle" type="button">Voice diagnostics</button></div><div id="vdPanel" class="vdpanel"><div class="vdrow"><span>Engine</span><b id="vdEngine">off</b></div><div class="vdrow"><span>Microphone</span><b id="vdMic">off</b></div><div class="vdrow"><span>Input level</span><span class="vdmeter"><i id="vdLevel"></i></span><b id="vdLevelN">0.0000</b></div><div class="vdrow"><span>Audio frames</span><b id="vdFrames">0</b></div><div class="vdrow"><span>Speech gate</span><b id="vdGate">idle</b></div><div class="vdrow"><span>Last heard</span><b id="vdLast">—</b></div><div class="vdrow"><span>Last error</span><b id="vdErr">none</b></div><button class="wbtn" id="vdCopy" type="button">Copy diagnostics</button><p class="wnote">If the level bar stays flat while you talk, the microphone is not reaching the page. If it moves but nothing happens, send me this readout.</p></div><label class="vcmd"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="voiceCmd" placeholder='Or type a command — try "open terminal"' autocomplete="off" /></label><button id="wakeToggle" type="button">Wake word: off</button><div class="chips"><button class="chip">Open accessibility</button><button class="chip">Start focus mode</button><button class="chip">Show my files</button><button class="chip">What can I say?</button></div></div></section>
+<aside id="gesture" class="gesture" aria-label="Gesture control panel"><div class="gesturehead"><h3>Gesture Control</h3><span class="badge">ON-DEVICE · PRIVATE</span></div><div class="camview" id="camview"><video id="gestureCam" autoplay playsinline muted></video><canvas id="skel"></canvas><div class="camoff">Camera off.<br>Enable hand tracking, or drive the pointer with your keyboard.</div></div><div class="gstatus"><span class="gdot" id="gDot"></span><span id="gStatus">Gesture mode ready</span></div><div class="gactions"><button id="camToggle" class="gbtn primary">Enable camera</button><button id="ptrCenter" class="gbtn">Center pointer</button><button id="ghostToggle" class="gbtn wide">Ghost overlay: on</button></div><div class="poserow"><span>Detected pose</span><b id="gPose">none</b></div><ul class="guide"><li><span><i>☝</i> <b>Point</b> — index fingertip drives the pointer</span></li><li><span><i>🤏</i> <b>Pinch</b> — thumb + index, release to click</span></li><li><span><i>👌</i> <b>OK sign</b> — opens the app launcher</span></li><li><span><i>✊</i> <b>Fist</b> — closes every panel</span></li><li><span><i>✋</i> <b>Open palm</b> — hold to freeze the pointer</span></li><li><span><i>👆👇</i> <b>Point up / down</b> — volume</span></li><li><span><i>✌</i> <b>Victory</b> — wakes Eva</span></li><li><span><i>🤘</i> <b>Horns</b> — opens this panel</span></li><li><span><i>👈👉</i> <b>Swipe</b> — switches workspace</span></li><li><span><i>⌨</i> <b>Arrow keys + Enter</b> — move & click — no camera needed</span></li></ul></aside>
+<div id="camghost" aria-hidden="true"><video id="ghostCam" autoplay playsinline muted></video></div><div id="windows" class="windows"></div><div id="pointer" class="pointer" aria-hidden="true"></div><div id="gtag" aria-hidden="true"></div><div id="heard" role="status" aria-live="polite"></div><div id="osd" aria-hidden="true"><div class="osdlabel"></div><div class="osdbar"><span class="osdfill"></span></div></div>
+<div id="toast" class="toast" role="status"><strong>Tosse OS Preview</strong><p id="toastText"></p></div>
+<script>
+const apps=[['Browser','globe'],['Files','folder'],['Eva','wave'],['Settings','gear'],['Terminal','terminal'],['Music','music'],['Photos','photos'],['Mail','mail'],['Notes','notes'],['Calculator','calc'],['Weather','weather'],['App Store','store'],['Studio','spark'],['Accessibility','access'],['Focus','focus'],['Privacy','shield']];
+const icons={globe:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4a13 13 0 010 16M12 4a13 13 0 000 16"/>',folder:'<path d="M3.5 7h6l2-2h9v13h-17z"/>',wave:'<path d="M4 12c2 0 2-5 4-5s2 10 4 10 2-8 4-8 2 4 4 4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1m-8.6 8.6l-2.1 2.1"/>',spark:'<path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6z"/>',access:'<circle cx="12" cy="5" r="2"/><path d="M5 9h14M12 9v12m0-7l-5 6m5-6l5 6"/>',focus:'<path d="M8 4H4v4m12-4h4v4M8 20H4v-4m12 4h4v-4"/><circle cx="12" cy="12" r="3"/>',shield:'<path d="M12 3l7 3v5c0 4.8-2.9 8.1-7 10-4.1-1.9-7-5.2-7-10V6z"/><path d="M9 12l2 2 4-4"/>',terminal:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M6.5 9l3.5 3-3.5 3M12 15h5.5"/>',music:'<path d="M9 18V6l10-2v11"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="15" r="2.2"/>',photos:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4.5 17.5l4.5-4.5 3 3 3.5-3.5 4 4"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',notes:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8.5h6M9 12.5h6M9 16.5h4"/>',calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.7 12h.01M12 12h.01M15.3 12h.01M8.7 15.5h.01M12 15.5h.01M15.3 15.5h.01"/>',weather:'<path d="M7 18a4 4 0 01-.6-7.95A5.5 5.5 0 0117.4 9a3.6 3.6 0 01-.4 9z"/>',store:'<path d="M5.5 8h13l-1.2 12a1.5 1.5 0 01-1.5 1.3H8.2A1.5 1.5 0 016.7 20z"/><path d="M9 10V6.5a3 3 0 016 0V10"/>'};
+const appsEl=document.querySelector('#apps');function renderApps(q=''){appsEl.innerHTML=apps.filter(a=>a[0].toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="app" data-app="${a[0]}"><span class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${icons[a[1]]}</svg></span><span>${a[0]}</span></button>`).join('')||'<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px">No matching apps</p>'}renderApps();
+const launcher=document.querySelector('#launcher'),voice=document.querySelector('#voice'),gesture=document.querySelector('#gesture'),toast=document.querySelector('#toast');let toastTimer;
+function closeAll(except){if(except!=='launcher')launcher.classList.remove('open');if(except!=='voice')voice.classList.remove('open');if(except!=='gesture')gesture.classList.remove('open')}
+function showToast(t){document.querySelector('#toastText').textContent=t;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2800)}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a){let n=a.dataset.action;if(n==='launcher'){let open=!launcher.classList.contains('open');closeAll();launcher.classList.toggle('open',open);if(open)setTimeout(()=>document.querySelector('#appSearch').focus(),80)}if(n==='voice'){closeAll('voice');voice.classList.add('open')}if(n==='gesture')toggleGesturePanel()}const t=e.target.closest('[data-toast]');if(t)showToast(t.dataset.toast);const c=e.target.closest('[data-close]');if(c)document.querySelector('#'+c.dataset.close).classList.remove('open');const chip=e.target.closest('.chip');if(chip){if(chip.textContent==='What can I say?'){runCommand('help')}else{document.querySelector('#voiceTitle').textContent='Done.';document.querySelector('#voiceText').textContent='“'+chip.textContent+'” has been simulated in this preview.'}}});
+document.querySelector('#appSearch').addEventListener('input',e=>renderApps(e.target.value));document.addEventListener('keydown',e=>{const typing=['INPUT','TEXTAREA'].includes(document.activeElement.tagName);if(e.code==='Space'&&!typing){e.preventDefault();closeAll('voice');voice.classList.add('open')}if((e.key==='g'||e.key==='G')&&!typing)toggleGesturePanel();if(e.key==='Escape'){closeAll();stopCamera()}});
+/* ================================================================
+   VOICE  ·  three-tier engine, rebuilt
+   1. browser-native SpeechRecognition — instant where it works
+   2. on-device Whisper (transformers.js, WebGPU->WASM) — private,
+      survives blocked/unreachable speech services, works in Firefox
+   3. typed commands — always available, never fails
+   Plus: live transcript HUD, optional "hey eva" wake word, echo
+   guard against Eva's own TTS, and a tolerant command parser.
+   ================================================================ */
+let micStream=null,audioContext=null,recognition=null,micWanted=false,speaking=false;
+let engine='none',nativeFails=0,heardAny=false,nativeWatch=null,restartAt=0;
+let whisperPipe=null,whisperReady=false,whisperBusy=false,captureOn=false,prCtx=null;
+let vadHot=false,vadSil=0,vadBuf=[],preRoll=[];
+let wakeMode=false,lastSay='',lastSayAt=0,nativeReason='',speakGuard=null,speakBack=true;
+let noiseFloor=0.006,lastRms=0,vadFrames=0,lastHeardText='',lastErrText='';
+let micRms=0,micFrames=0;                              /* raw mic level, every engine */
+try{speakBack=localStorage.getItem('tosseos.speak')!=='0'}catch(_){}
+const micLive=document.querySelector('#micLive'),engineEl=document.querySelector('#engineBtn'),
+  heardEl=document.querySelector('#heard'),wakeBtn=document.querySelector('#wakeToggle'),
+  vTitle=document.querySelector('#voiceTitle'),vText=document.querySelector('#voiceText'),
+  diagEl=document.querySelector('#voiceDiag');
+try{wakeMode=localStorage.getItem('tosseos.wake')==='1'}catch(_){}
+
+function syncMicUI(on){const st=document.querySelector('#micState'),btn=document.querySelector('#voiceMic');
+  st.classList.toggle('live',on);st.querySelector('span:last-child').textContent=on?'Microphone live':'Microphone off';
+  micLive.hidden=!on;btn.setAttribute('aria-label',on?'Disable microphone':'Enable microphone');if(!on)btn.style.transform=''}
+function setEngine(t){engineEl.textContent='Voice engine: '+t}
+function armSilenceNudge(){clearTimeout(nativeWatch);heardAny=false;
+  nativeWatch=setTimeout(()=>{if(engine==='native'&&!heardAny&&micStream)
+    setDiag('No audio reaching the browser engine — tap above to use the private on-device engine.')},12000)}
+function setSpeaking(on,ms){
+  speaking=!!on;clearTimeout(speakGuard);
+  /* hard ceiling: speechSynthesis does not reliably fire onend/onerror, and a
+     stuck flag silently deafens both engines. Never trust it to clear itself. */
+  if(on)speakGuard=setTimeout(()=>{speaking=false;lastSayAt=Date.now()},Math.min(9000,ms||4000));
+}
+function speak(t){
+  if(!speakBack||!('speechSynthesis' in window))return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);u.rate=1.04;
+    lastSay=t;lastSayAt=Date.now();
+    const budget=Math.min(9000,1200+String(t).length*75);
+    setSpeaking(true,budget);
+    u.onend=()=>{setSpeaking(false);lastSayAt=Date.now()};
+    u.onerror=()=>{setSpeaking(false);lastSayAt=Date.now()};
+    speechSynthesis.speak(u);
+  }catch(_){setSpeaking(false)}
+}
+function evaReply(title,text,say){vTitle.textContent=title;vText.textContent=text;if(say)speak(say)}
+/* live transcript HUD — visible on the desktop, not buried in the panel */
+function heard(text,final){if(!heardEl)return;heardEl.textContent=text;heardEl.classList.add('on');
+  heardEl.classList.toggle('final',!!final);clearTimeout(heard._t);
+  heard._t=setTimeout(()=>heardEl.classList.remove('on'),final?2400:4200)}
+function setWake(on){wakeMode=on;try{localStorage.setItem('tosseos.wake',on?'1':'0')}catch(_){}
+  if(wakeBtn)wakeBtn.textContent=on?'Wake word: “hey eva”':'Wake word: off (always listening)'}
+setWake(wakeMode);
+if(wakeBtn)wakeBtn.addEventListener('click',()=>{setWake(!wakeMode);
+  evaReply(wakeMode?'Wake word on.':'Always listening.',
+    wakeMode?'Start a command with “hey eva”.':'Every sentence is treated as a command.',null)});
+
+/* ---------------- command parser ---------------- */
+const WAKE=/\b(hey|hi|hello|ok|okay)?\s*(eva|evah|eva os|ever|evie)\b/;
+function norm(s){return ' '+String(s).toLowerCase()
+  .replace(/[^a-z0-9\s]/g,' ')
+  .replace(/\s+/g,' ').trim()+' '}
+function stripWake(s){return s.replace(WAKE,' ').replace(/\s+/g,' ')}
+const lev=(a,b)=>{const m=a.length,n=b.length;if(!m||!n)return Math.max(m,n);
+  let prev=Array.from({length:n+1},(_,j)=>j),cur=new Array(n+1);
+  for(let i=1;i<=m;i++){cur[0]=i;for(let j=1;j<=n;j++)
+    cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));[prev,cur]=[cur,prev]}
+  return prev[n]};
+/* tolerant app match: exact, then contains, then near-miss spelling */
+function matchApp(words){
+  const names=apps.map(a=>a[0]);
+  for(const n of names)if(words.includes(' '+n.toLowerCase()+' '))return n;
+  for(const n of names)if(words.includes(n.toLowerCase()))return n;
+  const toks=words.trim().split(' ').filter(w=>w.length>3);
+  let best=null,bestD=99;
+  for(const n of names){const ln=n.toLowerCase();
+    for(const t of toks){const d=lev(t,ln);if(d<bestD&&d<=Math.max(1,Math.floor(ln.length/4))){bestD=d;best=n}}}
+  return best;
+}
+function openApp(name){openAppWindow(name);
+  evaReply('Opening '+name+'.','“'+name+'” is open on the desktop.',name)}
+
+function runCommand(raw){
+  const src=String(raw||'');
+  /* echo guard: never obey Eva's own voice coming back through the mic */
+  if(lastSay&&Date.now()-lastSayAt<2200&&norm(src).includes(norm(lastSay).slice(1,18)))return;
+  /* chained commands: "open terminal and then next workspace" */
+  const parts=norm(src).split(/\s(?:and then|then|and also|and)\s/).map(s=>s.trim()).filter(Boolean);
+  if(parts.length>1){parts.forEach((p,i)=>setTimeout(()=>runOne(p,src),i*950));return}
+  runOne(norm(src),src);
+}
+function runOne(text,raw){
+  let c=' '+stripWake(text).trim()+' ';
+  const has=(...ws)=>ws.some(w=>c.includes(w));
+  if(c.trim()===''){evaReply('Yes?','I’m listening — say “help” for the command list.','Yes?');return}
+
+  if(has(' help ',' what can i say ',' what can you do ',' commands ',' command list ')){
+    evaReply('Voice commands',
+      'Apps: “open terminal” · Camera: “enable camera” · Pointer: “center pointer” · Workspaces: “next workspace”, “workspace two” · Sound: “volume up”, “mute” · Panels: “open launcher”, “open gestures”, “close” · Mic: “wake word on”, “stop listening”.',
+      'You can open any app, enable the camera, switch workspaces, change the volume, or say close, wake word on, or stop listening.');return}
+  if(has(' stop listening ',' goodbye ',' bye bye ',' turn off the mic ',' turn off mic ',' mic off ',' microphone off ')){
+    evaReply('Goodbye.','Voice control off — press Space whenever you need me.','Bye');setTimeout(stopMic,700);return}
+  if(has(' wake word on ',' enable wake word ',' require wake word ')){setWake(true);
+    evaReply('Wake word on.','Start each command with “hey eva”.','Wake word on');return}
+  if(has(' wake word off ',' disable wake word ',' always listen ',' always listening ')){setWake(false);
+    evaReply('Always listening.','Every sentence is treated as a command.','Always listening');return}
+
+  /* sound */
+  if(has(' volume up ',' louder ',' turn it up ',' turn up the volume ',' increase volume ')){
+    const v=nudgeVolume(1);evaReply('Volume '+v+'%.','Turned the volume up.','Volume '+v+' percent');return}
+  if(has(' volume down ',' quieter ',' turn it down ',' turn down the volume ',' lower the volume ',' decrease volume ')){
+    const v=nudgeVolume(-1);evaReply('Volume '+v+'%.','Turned the volume down.','Volume '+v+' percent');return}
+  if(has(' mute ',' silence ')){volume=0;osd('Muted',0);evaReply('Muted.','Audio muted.','Muted');return}
+
+  /* workspaces */
+  if(has(' next workspace ',' workspace next ',' switch workspace ')){switchWorkspace(1);
+    evaReply('Done.','Switched to '+wsNames[wsIndex]+'.',wsNames[wsIndex]);return}
+  if(has(' previous workspace ',' last workspace ',' workspace back ',' go back a workspace ')){switchWorkspace(-1);
+    evaReply('Done.','Switched to '+wsNames[wsIndex]+'.',wsNames[wsIndex]);return}
+  const wsN=has(' workspace one ',' workspace 1 ',' first workspace ')?0
+    :has(' workspace two ',' workspace 2 ',' second workspace ')?1
+    :has(' workspace three ',' workspace 3 ',' third workspace ')?2:-1;
+  if(wsN>-1){switchWorkspace(wsN-wsIndex);evaReply('Done.','Switched to '+wsNames[wsIndex]+'.',wsNames[wsIndex]);return}
+
+  /* camera + pointer */
+  if(has(' camera ',' hand tracking ',' tracking ')){
+    if(has(' off ',' disable ',' stop ',' kill ',' deactivate ')){stopCamera();
+      evaReply('Camera off.','Hand tracking is disabled — the sensor light is out.','Camera off');return}
+    startCamera();evaReply('Camera starting.','Hand tracking is turning on — watch the CAM indicator.','Camera on');return}
+  if(has(' ghost ',' overlay ')){const on=!ghostOn;setGhost(on);
+    evaReply('Ghost overlay '+(on?'on':'off')+'.','The camera AR layer is '+(on?'visible':'hidden')+'.',null);return}
+  if(has(' center pointer ',' centre pointer ',' center cursor ',' reset pointer ',' middle of the screen ')){
+    tx=innerWidth/2;ty=innerHeight/2;evaReply('Done.','Pointer centered.','Pointer centered');return}
+
+  /* panels */
+  if(has(' gesture')){if(!gesture.classList.contains('open'))toggleGesturePanel();
+    evaReply('Gesture Control.','Live landmarks, camera toggle and the pose guide live here.','Gesture panel open');return}
+  if(has(' launcher ',' show apps ',' open apps ',' app menu ',' all apps ',' show me the apps ')){openLauncher();
+    evaReply('Launcher open.','Say an app name, or pinch one with your hand.','Launcher open');return}
+  if(has(' close ',' go back ',' dismiss ',' escape ',' never mind ')){closeAll();
+    evaReply('Closed.','All panels dismissed.','Closed');return}
+
+  /* apps — verb optional: "terminal" works as well as "open terminal" */
+  const app=matchApp(c);
+  if(app&&(has(' open ',' launch ',' start ',' show ',' run ',' go to ')||c.trim().split(' ').length<=2)){openApp(app);return}
+
+  evaReply('Not sure.','I heard “'+String(raw).trim()+'”. Say “help” for the command list, or type it below.',null);
+}
+
+/* ---------------- tier 1: browser-native ---------------- */
+const SR_ERR={
+  'not-allowed':'Microphone blocked — open the padlock in the address bar, allow the mic, then toggle voice again.',
+  'service-not-allowed':'The browser blocked its speech service — switching to the on-device engine.',
+  'audio-capture':'No microphone detected — check your input device.',
+  'network':'The browser speech service is unreachable — switching to the on-device engine.',
+  'language-not-supported':'That language is unsupported here — switching to the on-device engine.'
+};
+function nativeDead(why){
+  nativeReason=why||'unavailable';lastErrText='native: '+nativeReason;
+  try{localStorage.setItem('tosseos.nativeDead','1')}catch(_){}
+  setDiag('Browser speech: '+nativeReason+' → using the private on-device engine.');
+}
+function setDiag(t){if(diagEl){diagEl.textContent=t||'';diagEl.classList.toggle('on',!!t)}}
+function startNative(){
+  return new Promise(resolve=>{
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){nativeDead('not supported in this browser');return resolve(false)}
+    let settled=false,rec;
+    const done=(ok,why)=>{
+      if(settled)return; settled=true; clearTimeout(probe);
+      if(!ok){engine='none';nativeDead(why);try{rec&&rec.stop()}catch(_){}}
+      resolve(ok);
+    };
+    try{ rec=recognition=new SR() }catch(err){ return done(false,'could not be created') }
+    rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-US';
+    /* proof of life — Chrome builds without a reachable speech service never
+       fire onstart *or* onerror, so a timeout is the only way to detect it */
+    const probe=setTimeout(()=>done(false,'no response from the speech service'),1800);
+    rec.onstart=()=>{
+      engine='native';setEngine('browser native — tap to switch');
+      setDiag('');armSilenceNudge();
+      vText.textContent=wakeMode?'Say \u201chey eva\u201d, then a command.':'Listening \u2014 say \u201chelp\u201d.';
+      done(true);
+    };
+    rec.onaudiostart=()=>{heardAny=true};
+    rec.onspeechstart=()=>{heardAny=true};
+    rec.onresult=e=>{heardAny=true;if(speaking)return;
+      let interim='',final='';
+      for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;
+        if(e.results[i].isFinal)final+=t;else interim+=t}
+      if(final.trim()){lastHeardText=final.trim();heard('\u2713 '+final.trim(),true);runCommand(final)}
+      else if(interim.trim()){heard('\ud83c\udf99 '+interim.trim());vText.textContent='\u201c'+interim.trim()+'\u201d'}};
+    rec.onerror=e=>{
+      if(e.error==='no-speech'||e.error==='aborted')return;
+      const msg=SR_ERR[e.error]||('error \u201c'+e.error+'\u201d');
+      if(!settled)return done(false,msg);
+      /* one real failure is enough once running */
+      nativeDead(msg);engine='none';
+      try{rec.onend=null;rec.stop()}catch(_){}
+      initWhisper();
+    };
+    rec.onend=()=>{if(micWanted&&micStream&&engine==='native'){
+      const wait=Date.now()-restartAt<900?700:120;restartAt=Date.now();
+      setTimeout(()=>{if(micWanted&&micStream&&engine==='native'&&recognition)try{recognition.start()}catch(_){}},wait)}};
+    try{ rec.start() }catch(err){ done(false,'could not start ('+err.message+')') }
+  });
+}
+
+/* ---------------- tier 2: on-device Whisper ---------------- */
+async function initWhisper(){
+  if(whisperPipe||engine==='whisper-loading'){if(whisperReady){engine='whisper';setEngine('on-device Whisper · private — tap to switch');startCapture()}return}
+  engine='whisper-loading';setEngine('loading on-device model…');
+  showToast('Switching to the private on-device voice engine — fetching the model once…');
+  setDiag('Fetching the private voice model — you can type commands in the box below meanwhile.');
+  try{
+    const tr=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3');
+    tr.env.allowLocalModels=false;
+    const pc=p=>{try{if(p&&p.status==='progress'&&/onnx|json/.test(p.file||''))
+      setDiag('Fetching the private voice model… '+Math.round(p.progress||0)+'% — you can type commands meanwhile.')}catch(_){}};
+    let gpuOK=false;try{gpuOK=!!(navigator.gpu&&await navigator.gpu.requestAdapter())}catch(_){}
+    if(gpuOK){try{whisperPipe=await tr.pipeline('automatic-speech-recognition','Xenova/whisper-tiny.en',{device:'webgpu',progress_callback:pc})}
+      catch(err){console.warn('WebGPU ASR failed, falling back to WASM',err);whisperPipe=null}}
+    if(!whisperPipe)whisperPipe=await tr.pipeline('automatic-speech-recognition','Xenova/whisper-tiny.en',{device:'wasm',progress_callback:pc});
+    whisperReady=true;engine='whisper';setEngine('on-device Whisper · private — tap to switch');
+    setDiag('Private on-device engine active — audio never leaves this device.');
+    showToast('Voice ready — speak a command');
+    startCapture();
+  }catch(err){engine='none';setEngine('unavailable — type below');
+    setDiag('Both speech engines are unavailable on this network. The typed command box still works.');
+    console.warn('Whisper init failed',err)}
+}
+const cat=a=>{const n=a.reduce((s,x)=>s+x.length,0),o=new Float32Array(n);let q=0;for(const x of a){o.set(x,q);q+=x.length}return o};
+function to16k(arr,rate){if(rate===16000)return arr;const ratio=rate/16000,out=new Float32Array(Math.floor(arr.length/ratio));
+  for(let i=0;i<out.length;i++)out[i]=arr[Math.floor(i*ratio)];return out}
+function startCapture(){
+  if(captureOn||!micStream)return;
+  try{prCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000})}
+  catch(_){prCtx=new (window.AudioContext||window.webkitAudioContext)()}
+  if(prCtx.state==='suspended')prCtx.resume().catch(()=>{});
+  const src=prCtx.createMediaStreamSource(micStream),sp=prCtx.createScriptProcessor(4096,1,1),mute=prCtx.createGain();
+  mute.gain.value=0;src.connect(sp);sp.connect(mute);mute.connect(prCtx.destination);
+  captureOn=true;vadHot=false;vadSil=0;vadBuf=[];preRoll=[];
+  sp.onaudioprocess=e=>{
+    const d=e.inputBuffer.getChannelData(0);
+    let sum=0;for(let i=0;i<d.length;i+=4)sum+=d[i]*d[i];
+    const rms=Math.sqrt(Math.max(sum,0)/(d.length/4));
+    lastRms=rms;vadFrames++;                             /* measured first, always */
+    if(speaking){vadHot=false;vadBuf=[];vadSil=0;return}
+    if(engine!=='whisper'||whisperBusy||!whisperReady)return;
+    const frame=Float32Array.from(d);
+    /* gate relative to the measured noise floor — a fixed threshold never
+       opens on a quiet mic and never closes on a loud room */
+    if(!vadHot)noiseFloor=noiseFloor*0.97+rms*0.03;
+    const openAt=Math.max(0.006,noiseFloor*3+0.004),closeAt=Math.max(0.004,noiseFloor*1.7+0.002);
+    if(!vadHot){preRoll.push(frame);if(preRoll.length>8)preRoll.shift();
+      if(rms>openAt){vadHot=true;vadBuf=preRoll.slice();preRoll=[];vadSil=0;heard('🎙 listening…')}}
+    else{vadBuf.push(frame);
+      if(rms<closeAt){vadSil+=d.length;if(vadSil>9000){const u=cat(vadBuf);vadHot=false;vadBuf=[];vadSil=0;transcribe(u)}}
+      else vadSil=0;
+      /* hard 8s cap. Hitting it means the gate never closed, so the room is
+         louder than the floor we measured — lift the floor instead of looping */
+      if(vadBuf.length*4096>128000){const u=cat(vadBuf);vadHot=false;vadBuf=[];vadSil=0;
+        noiseFloor=Math.min(0.15,Math.max(noiseFloor,rms*0.8));transcribe(u)}}};
+}
+async function transcribe(pcm){
+  if(!whisperReady||whisperBusy||pcm.length<4800)return;
+  whisperBusy=true;setDiag('Transcribing…');
+  try{
+    const r=await whisperPipe(to16k(pcm,prCtx.sampleRate));
+    const t=((r&&r.text)||'').replace(/\[[^\]]*\]/g,'').replace(/\([^)]*\)/g,'').trim();
+    if(t){lastHeardText=t;heard('✓ '+t,true);setDiag('Private on-device engine active — audio never leaves this device.');runCommand(t)}
+    else{heardEl&&heardEl.classList.remove('on');noiseFloor=Math.min(0.15,noiseFloor*1.25+0.002);
+      setDiag('Heard only background noise — try again, or type below.')}
+  }catch(err){console.warn('Transcribe failed',err);setDiag('Transcription failed — try again.')}
+  whisperBusy=false;
+}
+
+/* ---------------- engine switch ---------------- */
+engineEl.addEventListener('click',async()=>{
+  if(!micStream){setDiag('Turn the microphone on first.');return}
+  if(engine==='native'){nativeFails=99;clearTimeout(nativeWatch);try{recognition.stop()}catch(_){}
+    try{localStorage.setItem('tosseos.engine','whisper')}catch(_){}initWhisper()}
+  else{try{localStorage.setItem('tosseos.engine','native');localStorage.removeItem('tosseos.nativeDead')}catch(_){}
+    nativeFails=0;
+    const ok=await startNative();
+    if(!ok){setDiag('This browser still has no working native recognition — staying private and on-device.');
+      if(whisperReady){engine='whisper';setEngine('on-device Whisper · private — tap to switch');startCapture()}
+      else initWhisper()}}
+});
+
+/* ---------------- mic lifecycle ---------------- */
+async function startMic(){
+  if(micStream)return true;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    evaReply('Microphone unavailable','This browser does not expose secure media access — type commands instead.',null);return false}
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
+    micWanted=true;syncMicUI(true);
+    try{localStorage.setItem('tosseos.mic','1')}catch(_){}
+    vTitle.textContent='I’m listening.';
+    vText.textContent=wakeMode?'Say “hey eva”, then a command.':'Say “help” to hear what I can do.';
+    let pref=null,dead=false;
+    try{pref=localStorage.getItem('tosseos.engine');dead=localStorage.getItem('tosseos.nativeDead')==='1'}catch(_){}
+    if(whisperReady&&pref!=='native'){engine='whisper';setEngine('on-device Whisper · private — tap to switch');startCapture()}
+    else if(pref==='whisper'||(dead&&pref!=='native'))initWhisper();
+    else{const ok=await startNative();if(!ok)initWhisper()}
+    /* mic level ring on the button */
+    audioContext=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioContext.state==='suspended')audioContext.resume().catch(()=>{});
+    const src=audioContext.createMediaStreamSource(micStream),an=audioContext.createAnalyser();
+    an.fftSize=2048;src.connect(an);
+    const data=new Uint8Array(an.fftSize),btn=document.querySelector('#voiceMic');
+    /* time-domain RMS, independent of which speech engine is running, so the
+       diagnostics meter answers one question only: is audio reaching the page.
+       fast attack + slow release, so a syllable between two frames still shows */
+    const pulse=()=>{if(!micStream)return;an.getByteTimeDomainData(data);
+      let s2=0;for(let i=0;i<data.length;i++){const v=(data[i]-128)/128;s2+=v*v}
+      const rms=Math.sqrt(s2/data.length);
+      micRms=Math.max(rms,micRms*0.9);micFrames++;
+      btn.style.transform='scale('+(1+Math.min(micRms*1.9,.16))+')';requestAnimationFrame(pulse)};
+    pulse();
+    syncBoot();return true;
+  }catch(err){syncMicUI(false);console.warn('Microphone access failed',err);
+    evaReply('Microphone not connected','Allow microphone access in the browser site settings, then try again.',null);
+    syncBoot();return false}
+}
+function stopMic(){
+  micWanted=false;try{localStorage.removeItem('tosseos.mic')}catch(_){}
+  if(recognition){try{recognition.onend=null;recognition.stop()}catch(_){}recognition=null}
+  if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null}
+  if(audioContext){try{audioContext.close()}catch(_){}audioContext=null}
+  if(prCtx){try{prCtx.close()}catch(_){}prCtx=null}
+  captureOn=false;vadHot=false;vadBuf=[];preRoll=[];clearTimeout(nativeWatch);
+  micRms=0;micFrames=0;lastRms=0;vadFrames=0;
+  setSpeaking(false);try{speechSynthesis.cancel()}catch(_){}
+  engine='none';setEngine('off');syncMicUI(false);
+  if(heardEl)heardEl.classList.remove('on');
+  syncBoot();
+}
+/* live diagnostics — the mic level is the fastest way to tell whether audio
+   is reaching the page at all */
+const vdPanel=document.querySelector('#vdPanel');
+document.querySelector('#vdToggle').addEventListener('click',()=>{
+  const on=vdPanel.classList.toggle('on');
+  document.querySelector('#vdToggle').textContent=on?'Hide voice diagnostics':'Voice diagnostics';
+});
+function vdSet(id,v){const el=document.querySelector(id);if(el)el.textContent=v}
+function diagText(){
+  const ENG={none:'off',native:'browser native','whisper-loading':'loading on-device model',whisper:'on-device Whisper'};
+  return ['engine: '+(ENG[engine]||engine),
+    'microphone: '+(micStream?'live':'off'),
+    'input level: '+micRms.toFixed(4)+' (raw microphone)',
+    'audio frames: '+micFrames+' level, '+vadFrames+' speech',
+    'audio context: '+((audioContext&&audioContext.state)||'none')+' / '+((prCtx&&prCtx.state)||'none'),
+    'speech gate: '+(speaking?'muted (Eva is talking)':vadHot?'open':'idle')
+      +' (opens near '+Math.max(0.006,noiseFloor*3+0.004).toFixed(4)+')',
+    'model ready: '+whisperReady,
+    'last heard: '+(lastHeardText||'nothing yet'),
+    'last error: '+(lastErrText||'none'),
+    'browser: '+navigator.userAgent].join('\n');
+}
+setInterval(()=>{
+  if(!vdPanel||!vdPanel.classList.contains('on'))return;
+  const ENG={none:'off',native:'browser native','whisper-loading':'loading model…',whisper:'on-device Whisper'};
+  vdSet('#vdEngine',ENG[engine]||engine);
+  vdSet('#vdMic',micStream?'live':'off');
+  vdSet('#vdLevelN',micRms.toFixed(4));
+  const bar=document.querySelector('#vdLevel');
+  if(bar)bar.style.width=Math.min(100,micRms*420)+'%';
+  vdSet('#vdFrames',micFrames+' level · '+vadFrames+' speech');
+  vdSet('#vdGate',speaking?'muted (Eva talking)':vadHot?'open — capturing':'idle');
+  vdSet('#vdLast',lastHeardText||'—');
+  vdSet('#vdErr',lastErrText||'none');
+},250);
+document.querySelector('#vdCopy').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(diagText());showToast('Diagnostics copied to your clipboard')}
+  catch(_){setDiag(diagText().replace(/\n/g,' · '))}
+});
+const sbBtn=document.querySelector('#speakToggle');
+function setSpeakBack(on){speakBack=on;try{localStorage.setItem('tosseos.speak',on?'1':'0')}catch(_){}
+  if(sbBtn)sbBtn.textContent=on?'Eva speaks back: on':'Eva speaks back: off';
+  if(!on){setSpeaking(false);try{speechSynthesis.cancel()}catch(_){}}}
+setSpeakBack(speakBack);
+sbBtn.addEventListener('click',()=>setSpeakBack(!speakBack));
+document.querySelector('#voiceMic').addEventListener('click',()=>micStream?stopMic():startMic());
+document.querySelector('#voiceCmd').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const v=e.target.value.trim();e.target.value='';if(v){heard('⌨ '+v,true);runCommand(v)}e.preventDefault()}
+  e.stopPropagation()});
+document.querySelector('[data-close="voice"]').addEventListener('click',stopMic);
+/* ================================================================
+   HAND TRACKING  ·  MediaPipe Hands + Tosse OS pose classifier
+   Pose math is the reference build's (identical to the tosse_gestures
+   Python daemon): finger extension by wrist-distance ratio, thumb
+   extension, hand-size-normalised pinch, 11 discrete poses.
+   On top of it: per-landmark adaptive EMA so every joint is smoothed
+   *before* classification, an active-box pointer map, and pinch
+   hysteresis. camera_utils' Camera owns getUserMedia — never grab the
+   stream first, double acquisition is what kills tracking.
+   ================================================================ */
+const pointer=document.querySelector('#pointer'),camview=document.querySelector('#camview'),
+  gVideo=document.querySelector('#gestureCam'),ghostBox=document.querySelector('#camghost'),
+  ghostVideo=document.querySelector('#ghostCam'),skel=document.querySelector('#skel'),
+  gtag=document.querySelector('#gtag'),gDot=document.querySelector('#gDot'),
+  gStatus=document.querySelector('#gStatus'),camBtn=document.querySelector('#camToggle'),
+  camLive=document.querySelector('#camLive'),gPose=document.querySelector('#gPose'),
+  osdEl=document.querySelector('#osd');
+let hands=null,mpCam=null,tracking=false,pinchDown=false,paused=false,ghostOn=true;
+let smooth=null,pose='none',lastPose='',stable=0,lastFire=0,trail=[],palmSince=null,hoverEl=null,frames=0;
+let px=innerWidth/2,py=innerHeight/2,tx=px,ty=py;
+let volume=62;
+const wsNames=['Workspace 1','Workspace 2','Workspace 3'],wsDesc=['Flow','Focus','Play'];let wsIndex=0;
+document.body.dataset.ws='0';
+
+/* ---------------- pose classifier (ported math) ---------------- */
+const FING={index:[5,6,7,8],middle:[9,10,11,12],ring:[13,14,15,16],pinky:[17,18,19,20]};
+const d3=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+function classifyHand(p,pinchHeld){
+  const wrist=p[0];
+  const extended=f=>d3(p[FING[f][3]],wrist)>d3(p[FING[f][1]],wrist)*1.12;
+  const fingers=Object.keys(FING).filter(extended);
+  const thumbExt=d3(p[4],p[5])>d3(p[3],p[5])*1.25;
+  const size=Math.max(d3(wrist,p[9]),1e-6);
+  const gap=d3(p[4],p[8])/size;                       // normalised: works near or far
+  if(pinchHeld?gap<0.36:gap<0.27)                     // hysteresis kills pinch flicker
+    return ['middle','ring','pinky'].every(f=>fingers.includes(f))?'ok_sign':'pinch';
+  if(fingers.length===0)return 'fist';
+  if(fingers.length===4)return 'open_palm';
+  if(fingers.length===1&&fingers[0]==='index'){
+    if(thumbExt)return 'cursor';
+    const dy=p[8][1]-wrist[1],dx=p[8][0]-wrist[0];
+    if(Math.abs(dy)>=Math.abs(dx))return dy>0?'point_up':'point_down';
+    return dx>0?'point_right':'point_left';
+  }
+  if(fingers.length===2&&fingers.includes('index')&&fingers.includes('middle'))return 'victory';
+  if(fingers.length===2&&fingers.includes('index')&&fingers.includes('pinky'))return 'horns';
+  return 'none';
+}
+const POSE_LABEL={pinch:'pinch',ok_sign:'OK sign',fist:'fist',open_palm:'open palm',cursor:'L-pose',
+  point_up:'point up',point_down:'point down',point_left:'point left',point_right:'point right',
+  victory:'victory',horns:'horns',swipe_left:'swipe left',swipe_right:'swipe right',none:'hand'};
+
+/* ---------------- adaptive per-landmark smoothing ---------------- */
+/* mirror + y-up, then chase fast movement and damp micro-jitter. This is
+   what makes fingers read steady instead of twitching frame to frame. */
+function smoothHand(raw){
+  const t=raw.map(pt=>[1-pt.x,1-pt.y,pt.z]);
+  if(!smooth){smooth=t.map(p=>p.slice());return smooth}
+  for(let i=0;i<t.length;i++){
+    const s=smooth[i],n=t[i];
+    const jump=Math.hypot(n[0]-s[0],n[1]-s[1]);
+    const a=Math.min(0.88,0.26+jump*7.5);
+    s[0]+=(n[0]-s[0])*a;s[1]+=(n[1]-s[1])*a;s[2]+=(n[2]-s[2])*a;
+  }
+  return smooth;
+}
+
+/* ---------------- skeleton overlay (21 landmarks, cover-mapped) ---------------- */
+const BONES=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],
+  [9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+function drawSkeleton(p){
+  if(!skel)return;
+  const w=skel.clientWidth,h=skel.clientHeight;
+  if(!w||!h)return;
+  if(skel.width!==w)skel.width=w;
+  if(skel.height!==h)skel.height=h;
+  const ctx=skel.getContext('2d');ctx.clearRect(0,0,w,h);
+  if(!p)return;
+  const vw=gVideo.videoWidth||640,vh=gVideo.videoHeight||480;
+  const sc=Math.max(w/vw,h/vh),dw=vw*sc,dh=vh*sc,ox=(w-dw)/2,oy=(h-dh)/2;  // object-fit:cover
+  const X=i=>ox+p[i][0]*dw,Y=i=>oy+(1-p[i][1])*dh;
+  ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.strokeStyle='rgba(143,176,255,.9)';
+  ctx.beginPath();for(const[a,b]of BONES){ctx.moveTo(X(a),Y(a));ctx.lineTo(X(b),Y(b))}ctx.stroke();
+  for(let i=0;i<p.length;i++){
+    const tip=i===4||i===8||i===12||i===16||i===20;
+    ctx.beginPath();ctx.arc(X(i),Y(i),tip?4.2:2.4,0,6.2832);
+    ctx.fillStyle=tip?'#ffffff':'rgba(143,176,255,.95)';ctx.fill();
+  }
+}
+
+/* ---------------- pointer ---------------- */
+const BOX=0.15;                                        // active camera region -> full screen
+const mapAx=v=>Math.min(1,Math.max(0,(v-BOX)/(1-2*BOX)));
+function setGStatus(t,m){gStatus.textContent=t;gDot.className='gdot'+(m?' '+m:'')}
+function setPose(p){if(gPose)gPose.textContent=POSE_LABEL[p]||p}
+function gestureActive(){return tracking||gesture.classList.contains('open')}
+function toggleGesturePanel(){const open=!gesture.classList.contains('open');closeAll();gesture.classList.toggle('open',open);
+  if(open){if(!tracking){tx=innerWidth*.72;ty=innerHeight*.55}setGStatus(tracking?'Tracking live — 21 landmarks locked':'Gesture mode on — enable the camera, or use arrow keys + Enter',tracking?'on':'')}
+  else setGStatus('Gesture mode off','')}
+function ripple(x,y){const r=document.createElement('span');r.className='ripple';r.style.left=x+'px';r.style.top=y+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),480)}
+function pickAt(x,y){const el=document.elementFromPoint(x,y);return el&&el.closest('button,a,input,[data-action],[data-toast],[data-app],.chip')}
+function gestureClick(){ripple(px,py);const t=pickAt(px,py);if(t){t.click();if(t.tagName==='INPUT')t.focus()}}
+function hoverCheck(){const t=pickAt(px,py);if(t!==hoverEl){if(hoverEl)hoverEl.classList.remove('ghover');hoverEl=t;if(t)t.classList.add('ghover')}}
+function renderPointer(){
+  const dx=tx-px,dy=ty-py,dist=Math.hypot(dx,dy);
+  const a=dist>150?.42:dist>45?.3:.17;                 // snappy across the screen, steady on a target
+  px+=dx*a;py+=dy*a;
+  px=Math.max(6,Math.min(innerWidth-6,px));py=Math.max(6,Math.min(innerHeight-6,py));
+  pointer.style.transform=`translate(${px}px,${py}px) scale(${pinchDown?.7:1})`;
+  if(gtag.classList.contains('on')){gtag.style.left=px+'px';gtag.style.top=py+'px'}
+  if(gestureActive()){pointer.classList.add('on');hoverCheck()}
+  else{pointer.classList.remove('on');if(hoverEl){hoverEl.classList.remove('ghover');hoverEl=null}}
+  requestAnimationFrame(renderPointer);
+}
+renderPointer();
+
+/* ---------------- gesture -> OS action bindings ---------------- */
+function osd(label,pct){if(!osdEl)return;osdEl.querySelector('.osdlabel').textContent=label;
+  osdEl.querySelector('.osdfill').style.width=Math.max(0,Math.min(100,pct))+'%';
+  osdEl.classList.add('show');clearTimeout(osd._t);osd._t=setTimeout(()=>osdEl.classList.remove('show'),1300)}
+function nudgeVolume(dir){volume=Math.max(0,Math.min(100,volume+dir*8));osd('Volume '+volume+'%',volume);return volume}
+function openLauncher(){if(!launcher.classList.contains('open')){closeAll();launcher.classList.add('open')}}
+function openVoicePanel(){closeAll('voice');voice.classList.add('open')}
+function switchWorkspace(dir){wsIndex=(wsIndex+dir+wsNames.length)%wsNames.length;document.body.dataset.ws=String(wsIndex);
+  document.querySelector('#wsName').textContent=wsNames[wsIndex];showToast(wsNames[wsIndex]+' · '+wsDesc[wsIndex])}
+const GBIND={
+  ok_sign:{act:openLauncher,say:'OK sign — launcher'},
+  fist:{act:()=>{closeAll();showToast('Fist — panels dismissed')},say:'Fist — close'},
+  point_up:{act:()=>nudgeVolume(1),say:'Volume up'},
+  point_down:{act:()=>nudgeVolume(-1),say:'Volume down'},
+  victory:{act:openVoicePanel,say:'Victory — Eva'},
+  horns:{act:()=>{if(!gesture.classList.contains('open'))toggleGesturePanel()},say:'Horns — gesture panel'},
+  swipe_left:{act:()=>switchWorkspace(1),say:'Swipe left'},
+  swipe_right:{act:()=>switchWorkspace(-1),say:'Swipe right'}
+};
+function fireGesture(g){const b=GBIND[g];if(!b)return;b.act();setPose(g)}
+
+/* ---------------- results pipeline ---------------- */
+function onHand(res){
+  if(!tracking)return;
+  const raw=res.multiHandLandmarks&&res.multiHandLandmarks[0];
+  if(!raw){
+    smooth=null;pinchDown=false;palmSince=null;trail=[];lastPose='';stable=0;
+    if(paused){paused=false;pointer.classList.remove('paused')}
+    pointer.classList.remove('pinch');gtag.classList.remove('on');drawSkeleton(null);setPose('none');
+    setGStatus('Camera live — show one hand to take control','');
+    return;
+  }
+  const p=smoothHand(raw),now=performance.now();
+  drawSkeleton(p);
+  pose=classifyHand(p,pinchDown);
+
+  /* pinch: entering the pose arms it, releasing clicks — same as a real button */
+  const isPinch=pose==='pinch'||pose==='ok_sign';
+  if(!pinchDown&&pose==='pinch'){pinchDown=true}
+  else if(pinchDown&&!isPinch){pinchDown=false;if(now-lastFire>260){lastFire=now;gestureClick()}}
+  pointer.classList.toggle('pinch',pinchDown);
+
+  /* pointer follows the index fingertip absolutely — no accumulation, no drift */
+  if(!paused){tx=mapAx(p[8][0])*innerWidth;ty=(1-mapAx(p[8][1]))*innerHeight}
+
+  /* floating pose label rides with the pointer */
+  gtag.textContent=POSE_LABEL[pose]||pose;gtag.classList.add('on');setPose(pose);
+
+  /* open palm held = freeze (so you can rest your hand mid-air) */
+  if(pose==='open_palm'&&!pinchDown){
+    if(!palmSince)palmSince=now;
+    if(now-palmSince>420){if(!paused){paused=true;pointer.classList.add('paused')}setGStatus('Paused — open palm held. Relax your hand to resume.','')}
+  }else{palmSince=null;if(paused){paused=false;pointer.classList.remove('paused')}}
+
+  /* swipe from mirrored wrist travel inside a 280ms window */
+  let fired=pose;
+  trail.push([now,p[0][0]]);trail=trail.filter(([t])=>now-t<280);
+  if(trail.length>2){
+    const travel=trail[trail.length-1][1]-trail[0][1];
+    if(Math.abs(travel)>0.22){fired=travel>0?'swipe_right':'swipe_left';trail=[]}
+  }
+
+  /* stability gate + cooldown so a pose has to be meant, not passed through */
+  if(fired===lastPose)stable++;else{lastPose=fired;stable=0}
+  const isSwipe=fired==='swipe_left'||fired==='swipe_right';
+  if(GBIND[fired]&&(isSwipe||stable>=2)&&now-lastFire>820){
+    lastFire=now;gtag.textContent=(POSE_LABEL[fired]||fired)+' ✓';fireGesture(fired);
+  }
+  if(!paused)setGStatus(pinchDown?'Pinch held — release to click':'Tracking live — 21 landmarks locked','on');
+}
+
+/* ---------------- camera lifecycle ---------------- */
+let camBusy=false,camCancel=false;
+async function startCamera(){
+  if(tracking||camBusy)return tracking;
+  if(typeof Hands==='undefined'||typeof Camera==='undefined'){setGStatus('Hand-tracking library did not load — check the connection and reload. Arrow keys still work.','err');return false}
+  camBusy=true;camCancel=false;
+  camBtn.disabled=true;camBtn.textContent='Starting…';setGStatus('Loading hand-tracking model…','');
+  try{
+    hands=new Hands({locateFile:f=>'https://cdn.jsdelivr.net/npm/@mediapipe/hands/'+f});
+    hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:0.45,minTrackingConfidence:0.45});
+    hands.onResults(onHand);
+    /* Camera owns getUserMedia. Do NOT pre-acquire the stream. */
+    mpCam=new Camera(gVideo,{onFrame:async()=>{if(hands)try{await hands.send({image:gVideo})}catch(_){}},width:640,height:480});
+    await mpCam.start();
+    if(ghostVideo){ghostVideo.srcObject=gVideo.srcObject;ghostBox.classList.toggle('on',ghostOn)}
+    tracking=true;smooth=null;camview.classList.add('live');camLive.hidden=false;
+    camBtn.disabled=false;camBtn.textContent='Disable camera';camBtn.classList.remove('primary');
+    setGStatus('Camera live — show one hand to take control','');
+    try{localStorage.setItem('tosseos.cam','1')}catch(_){}
+    syncBoot();return true;
+  }catch(err){
+    console.warn('Camera start failed',err);
+    if(mpCam){try{mpCam.stop()}catch(_){}mpCam=null}
+    if(hands){try{hands.close()}catch(_){}hands=null}
+    camBtn.disabled=false;camBtn.textContent='Enable camera';
+    setGStatus('Camera refused or unavailable — allow it in the browser prompt / site settings','err');
+    syncBoot();return false;
+  }finally{
+    camBusy=false;
+    /* tearing the solution down while its assets are still downloading makes
+       MediaPipe throw from inside its own loader, so a stop asked for during
+       start-up is honoured here instead */
+    if(camCancel){camCancel=false;stopCamera()}
+  }
+}
+function stopCamera(){
+  if(camBusy){camCancel=true;setGStatus('Stopping the camera…','');return}
+  if(mpCam){try{mpCam.stop()}catch(_){}mpCam=null}
+  if(gVideo.srcObject){gVideo.srcObject.getTracks().forEach(t=>t.stop());gVideo.srcObject=null}
+  if(ghostVideo)ghostVideo.srcObject=null;
+  if(ghostBox)ghostBox.classList.remove('on');
+  if(hands){try{hands.close()}catch(_){}hands=null}
+  tracking=false;pinchDown=false;paused=false;smooth=null;trail=[];palmSince=null;lastPose='';stable=0;
+  camview.classList.remove('live');camLive.hidden=true;drawSkeleton(null);
+  pointer.classList.remove('pinch','paused');gtag.classList.remove('on');setPose('none');
+  camBtn.textContent='Enable camera';camBtn.classList.add('primary');
+  setGStatus(gesture.classList.contains('open')?'Camera off — arrow keys move, Enter clicks':'Gesture mode off','');
+  try{localStorage.removeItem('tosseos.cam')}catch(_){}
+  syncBoot();
+}
+function setGhost(on){ghostOn=on;if(ghostBox)ghostBox.classList.toggle('on',on&&tracking);
+  const b=document.querySelector('#ghostToggle');if(b)b.textContent=on?'Ghost overlay: on':'Ghost overlay: off'}
+camBtn.addEventListener('click',()=>tracking?stopCamera():startCamera());
+document.querySelector('#ptrCenter').addEventListener('click',()=>{tx=innerWidth/2;ty=innerHeight/2});
+const ghostBtn=document.querySelector('#ghostToggle');
+if(ghostBtn)ghostBtn.addEventListener('click',()=>setGhost(!ghostOn));
+document.addEventListener('keydown',e=>{
+  if(!gestureActive())return;
+  if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+  const step=e.shiftKey?64:26;let used=true;
+  if(e.key==='ArrowLeft')tx-=step;else if(e.key==='ArrowRight')tx+=step;
+  else if(e.key==='ArrowUp')ty-=step;else if(e.key==='ArrowDown')ty+=step;
+  else if(e.key==='Enter')gestureClick();else used=false;
+  if(used)e.preventDefault();
+});
+/* ================================================================
+   APPS  ·  a tiny window manager plus real, working app content.
+   Windows are draggable, focusable and closable, and every app in
+   the launcher opens one. Gesture pinch-clicks and voice commands
+   drive the same entry point.
+   ================================================================ */
+const winLayer=document.querySelector('#windows');
+const openWins=new Map(); let winZ=1, cascade=0;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const pad2=n=>String(n).padStart(2,'0');
+
+function closeAppWindow(name){const w=openWins.get(name);if(!w)return;
+  if(w._cleanup)try{w._cleanup()}catch(_){}
+  w.el.remove();openWins.delete(name)}
+function focusWindow(name){const w=openWins.get(name);if(w)w.el.style.zIndex=String(++winZ)}
+function openAppWindow(name){
+  if(name==='Eva'){closeAll('voice');voice.classList.add('open');return}
+  if(name==='Gestures'){if(!gesture.classList.contains('open'))toggleGesturePanel();return}
+  launcher.classList.remove('open');
+  if(openWins.has(name)){focusWindow(name);return}
+  const def=APPDEF[name]||APPDEF._fallback;
+  const el=document.createElement('section');
+  el.className='win';el.style.zIndex=String(++winZ);
+  const w=Math.min(def.w||520,innerWidth-32),h=Math.min(def.h||400,innerHeight-150);
+  const step=(cascade++%5)*26;
+  el.style.width=w+'px';
+  el.style.left=Math.max(16,Math.min(innerWidth-w-16,(innerWidth-w)/2-90+step))+'px';
+  el.style.top=Math.max(58,68+step)+'px';
+  el.innerHTML='<header class="wbar"><span class="wdot"></span><h4>'+name+'</h4>'
+    +'<button class="wclose" aria-label="Close '+name+'">×</button></header>'
+    +'<div class="wbody" style="min-height:'+h+'px"></div>';
+  const body=el.querySelector('.wbody');
+  winLayer.appendChild(el);
+  const rec={el,body,name};openWins.set(name,rec);
+  el.querySelector('.wclose').addEventListener('click',()=>closeAppWindow(name));
+  el.addEventListener('pointerdown',()=>focusWindow(name));
+  dragWindow(el,el.querySelector('.wbar'));
+  try{ def.render(body,rec) }catch(err){ body.innerHTML='<p class="wnote">This module hit an error: '+err.message+'</p>'; console.warn(err) }
+  showToast(name+' opened');
+  return rec;
+}
+function dragWindow(el,handle){
+  let sx=0,sy=0,ox=0,oy=0,on=false;
+  handle.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.wclose'))return;
+    on=true;sx=e.clientX;sy=e.clientY;ox=parseFloat(el.style.left);oy=parseFloat(el.style.top);
+    handle.setPointerCapture(e.pointerId);handle.classList.add('grabbing');
+  });
+  handle.addEventListener('pointermove',e=>{
+    if(!on)return;
+    el.style.left=Math.max(6,Math.min(innerWidth-90,ox+e.clientX-sx))+'px';
+    el.style.top=Math.max(46,Math.min(innerHeight-60,oy+e.clientY-sy))+'px';
+  });
+  const end=e=>{on=false;handle.classList.remove('grabbing');
+    try{handle.releasePointerCapture(e.pointerId)}catch(_){}};
+  handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',end);
+}
+
+/* ---------------- app definitions ---------------- */
+const APPDEF={};
+
+APPDEF.Calculator={w:300,h:330,render(b){
+  b.innerHTML='<div class="calc"><output id="calcOut">0</output><div class="calcpad"></div>'
+    +'<p class="wnote">Real arithmetic — click the keys or type with your keyboard.</p></div>';
+  const out=b.querySelector('#calcOut'),pad=b.querySelector('.calcpad');
+  let cur='0',prev=null,op=null,fresh=true;
+  const show=()=>out.textContent=cur.length>12?Number(cur).toPrecision(9):cur;
+  const apply=()=>{const a=parseFloat(prev),c=parseFloat(cur);
+    const r=op==='+'?a+c:op==='-'?a-c:op==='x'?a*c:op==='/'?(c===0?NaN:a/c):c;
+    return Number.isFinite(r)?String(Math.round(r*1e10)/1e10):'Error'};
+  function key(k){
+    if(/^[0-9]$/.test(k)){cur=(fresh||cur==='0')?k:cur+k;fresh=false}
+    else if(k==='.'){if(fresh){cur='0.';fresh=false}else if(!cur.includes('.'))cur+='.'}
+    else if(k==='C'){cur='0';prev=null;op=null;fresh=true}
+    else if(k==='±'){cur=cur.startsWith('-')?cur.slice(1):'-'+cur}
+    else if(k==='%'){cur=String(parseFloat(cur)/100)}
+    else if(k==='='){if(op!==null){cur=apply();prev=null;op=null;fresh=true}}
+    else{if(op!==null&&!fresh)cur=apply();prev=cur;op=k;fresh=true}
+    show();
+  }
+  ['C','±','%','/','7','8','9','x','4','5','6','-','1','2','3','+','0','.','='].forEach(k=>{
+    const btn=document.createElement('button');
+    btn.className='ckey'+(/[\/x\-+=]/.test(k)&&k.length===1?' op':'')+(k==='='?' eq':'')+(k==='0'?' zero':'');
+    btn.textContent=k;btn.addEventListener('click',()=>key(k));pad.appendChild(btn);
+  });
+  const kb=e=>{if(!openWins.has('Calculator'))return;
+    const m={'*':'x','/':'/','+':'+','-':'-','Enter':'=','Escape':'C','Backspace':'C','%':'%'};
+    if(/^[0-9.]$/.test(e.key)){key(e.key);e.preventDefault()}
+    else if(m[e.key]){key(m[e.key]);e.preventDefault()}};
+  document.addEventListener('keydown',kb);
+  b.parentElement._cleanup=()=>document.removeEventListener('keydown',kb);
+  show();
+}};
+
+const TRACKS=[
+  ['Monsoon Ragas','Anandi Rao','Kerala Sessions',252,'#4f7cff,#9d6bff'],
+  ['Neon Kollam','ZenvX','After Hours',198,'#ff6b9d,#ff9d4f'],
+  ['Zorin Dreams','The Kernel Panics','Open Source',224,'#4fd1ff,#4f7cff'],
+  ['Voice of Eva','Meera S','Signals',187,'#9d6bff,#ff6bd6'],
+  ['Backwater Drive','Kochi Tape Club','Night Runs',273,'#4fffa3,#4fd1ff'],
+  ['Silent Gestures','Hushfield','Touch Free',241,'#ffd24f,#ff6b6b'],
+  ['Terminal Velocity','sudo rm','Root',205,'#8f9bff,#c9b6ff'],
+];
+const MICO={
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l12 7-12 7z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="5" width="3.4" height="14" rx="1"/><rect x="13.6" y="5" width="3.4" height="14" rx="1"/></svg>',
+  prev:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 5v14l-9-7z"/><rect x="5" y="5" width="2.6" height="14" rx="1"/></svg>',
+  next:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14l9-7z"/><rect x="16.4" y="5" width="2.6" height="14" rx="1"/></svg>'};
+APPDEF.Music={w:400,h:400,render(b,rec){
+  b.innerHTML='<div class="music"><div class="art" id="mArt"></div>'
+    +'<h3 id="mTitle"></h3><p id="mMeta" class="wsub"></p>'
+    +'<div class="seek"><span id="mFill"></span></div>'
+    +'<div class="times"><span id="mNow">0:00</span><span id="mEnd">0:00</span></div>'
+    +'<div class="mctl"><button id="mPrev" aria-label="Previous">'+MICO.prev+'</button>'
+    +'<button id="mPlay" class="big" aria-label="Play">'+MICO.play+'</button>'
+    +'<button id="mNext" aria-label="Next">'+MICO.next+'</button></div>'
+    +'<p class="wnote">Track picked at random. Playback is simulated — no audio is streamed in this preview.</p></div>';
+  const $$=s=>b.querySelector(s);
+  let t=null,pos=0,playing=false,timer=null;
+  const fmt=s=>Math.floor(s/60)+':'+pad2(Math.floor(s%60));
+  function load(){
+    t=pick(TRACKS.filter(x=>!t||x[0]!==t[0]));pos=0;
+    $$('#mArt').style.background='linear-gradient(135deg,'+t[4]+')';
+    $$('#mTitle').textContent=t[0];
+    $$('#mMeta').textContent=t[1]+' · '+t[2];
+    $$('#mEnd').textContent=fmt(t[3]);draw();
+  }
+  function draw(){$$('#mNow').textContent=fmt(pos);
+    $$('#mFill').style.width=(pos/t[3]*100)+'%'}
+  function setPlay(p){playing=p;
+    const btn=$$('#mPlay');
+    btn.innerHTML=p?MICO.pause:MICO.play;
+    btn.dataset.state=p?'playing':'paused';
+    btn.setAttribute('aria-label',p?'Pause':'Play');
+    $$('#mArt').classList.toggle('spin',p);
+    clearInterval(timer);
+    if(p)timer=setInterval(()=>{pos+=1;if(pos>=t[3]){load();setPlay(true);return}draw()},1000)}
+  $$('#mPlay').addEventListener('click',()=>setPlay(!playing));
+  $$('#mNext').addEventListener('click',()=>{load();setPlay(playing)});
+  $$('#mPrev').addEventListener('click',()=>{load();setPlay(playing)});
+  rec.el._cleanup=()=>clearInterval(timer);
+  load();setPlay(true);
+}};
+
+const CITIES=['Thiruvananthapuram','Kochi','Bengaluru','Chennai','Mumbai','Delhi','Hyderabad','Pune','Kolkata','Goa'];
+const COND=[['Clear','☀️',1],['Sunny','🌤',1],['Partly cloudy','⛅',0],['Cloudy','☁️',-1],
+            ['Light rain','🌦',-2],['Monsoon showers','🌧',-3],['Thunderstorm','⛈',-3],['Humid haze','🌫',1]];
+APPDEF.Weather={w:420,h:400,render(b){
+  b.innerHTML='<div class="weather"><div class="wtop"><div><h3 id="wCity"></h3>'
+    +'<p id="wCond" class="wsub"></p></div><div class="wnow"><span id="wIcon"></span>'
+    +'<strong id="wTemp"></strong></div></div><div class="wgrid" id="wGrid"></div>'
+    +'<div class="wcast" id="wCast"></div>'
+    +'<button class="wbtn" id="wRefresh">Refresh reading</button>'
+    +'<p class="wnote">Simulated sensor data — a real build would read a weather provider.</p></div>';
+  const $$=s=>b.querySelector(s);
+  function gen(){
+    const city=pick(CITIES),c=pick(COND);
+    const temp=Math.round(rnd(21,36)+c[2]);
+    $$('#wCity').textContent=city;
+    $$('#wCond').textContent=c[0]+' · feels like '+Math.round(temp+rnd(-1,4))+'°';
+    $$('#wIcon').textContent=c[1];$$('#wTemp').textContent=temp+'°';
+    const stats=[['Humidity',Math.round(rnd(42,94))+'%'],['Wind',Math.round(rnd(4,29))+' km/h'],
+      ['UV index',String(Math.round(rnd(1,11)))],['Pressure',Math.round(rnd(998,1016))+' hPa'],
+      ['Visibility',(Math.round(rnd(3,14)*10)/10)+' km'],['Air quality',pick(['Good','Fair','Moderate','Poor'])]];
+    $$('#wGrid').innerHTML=stats.map(([k,v])=>'<div><small>'+k+'</small><b>'+v+'</b></div>').join('');
+    const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],d0=new Date().getDay();
+    $$('#wCast').innerHTML=Array.from({length:5},(_,i)=>{const cc=pick(COND);
+      return '<div><small>'+days[(d0+i+1)%7]+'</small><span>'+cc[1]+'</span>'
+        +'<b>'+Math.round(rnd(20,35)+cc[2])+'°</b></div>'}).join('');
+  }
+  $$('#wRefresh').addEventListener('click',gen);gen();
+}};
+
+APPDEF.Files={w:520,h:360,render(b){
+  const tree={'/home/tosse':[['Documents','dir'],['Pictures','dir'],['Music','dir'],
+      ['masterplan.md','file','18 KB'],['tosse-notes.txt','file','3 KB'],['zorin-base.iso','file','2.4 GB']],
+    '/home/tosse/Documents':[['..','up'],['gesture-spec.pdf','file','412 KB'],['voice-grammar.json','file','22 KB']],
+    '/home/tosse/Pictures':[['..','up'],['desk-01.png','file','1.2 MB'],['wallpaper.jpg','file','3.8 MB']],
+    '/home/tosse/Music':[['..','up'],['monsoon-ragas.flac','file','48 MB'],['neon-kollam.mp3','file','7 MB']]};
+  let cwd='/home/tosse';
+  b.innerHTML='<div class="files"><div class="fpath" id="fPath"></div><ul class="flist" id="fList"></ul>'
+    +'<p class="wnote">A simulated file tree — click folders to browse.</p></div>';
+  const draw=()=>{
+    b.querySelector('#fPath').textContent=cwd;
+    b.querySelector('#fList').innerHTML=(tree[cwd]||[]).map(([n,t,s])=>
+      '<li><button data-n="'+n+'" data-t="'+t+'"><span>'+(t==='dir'?'📁':t==='up'?'↩':'📄')
+      +'</span><span class="fn">'+n+'</span><small>'+(s||'')+'</small></button></li>').join('');
+    b.querySelectorAll('#fList button').forEach(btn=>btn.addEventListener('click',()=>{
+      const {n,t}=btn.dataset;
+      if(t==='dir'){cwd=cwd+'/'+n;draw()}
+      else if(t==='up'){cwd=cwd.split('/').slice(0,-1).join('/')||'/home/tosse';draw()}
+      else showToast(n+' — preview only');
+    }));
+  };draw();
+}};
+
+APPDEF.Notes={w:460,h:340,render(b){
+  b.innerHTML='<div class="notes"><textarea id="nText" spellcheck="false"></textarea>'
+    +'<div class="nrow"><span id="nCount" class="wsub"></span><button class="wbtn" id="nClear">Clear</button></div>'
+    +'<p class="wnote">Saved in your browser only — nothing leaves this device.</p></div>';
+  const ta=b.querySelector('#nText'),cnt=b.querySelector('#nCount');
+  let saved='';try{saved=localStorage.getItem('tosseos.notes')||''}catch(_){}
+  ta.value=saved||'Tosse OS notes\n\n- voice + gesture demo shipped\n- test on the Render URL\n';
+  const upd=()=>{cnt.textContent=ta.value.trim().split(/\s+/).filter(Boolean).length+' words · saved locally';
+    try{localStorage.setItem('tosseos.notes',ta.value)}catch(_){}};
+  ta.addEventListener('input',upd);ta.addEventListener('keydown',e=>e.stopPropagation());
+  b.querySelector('#nClear').addEventListener('click',()=>{ta.value='';upd()});upd();
+}};
+
+APPDEF.Terminal={w:520,h:320,render(b){
+  b.innerHTML='<div class="term"><div class="tout" id="tOut"></div>'
+    +'<div class="tin"><span>tosse@zenvx:~$</span><input id="tIn" autocomplete="off" spellcheck="false" /></div></div>';
+  const out=b.querySelector('#tOut'),inp=b.querySelector('#tIn');
+  const say=(t,cls)=>{const d=document.createElement('div');if(cls)d.className=cls;d.textContent=t;
+    out.appendChild(d);out.scrollTop=1e9};
+  say('Tosse OS shell (preview) — type `help`','dim');
+  const CMDS={
+    help:()=>say('help  ls  pwd  whoami  uname  date  eva  volume  gestures  clear'),
+    ls:()=>say('Documents  Pictures  Music  masterplan.md  tosse-notes.txt'),
+    pwd:()=>say('/home/tosse'),
+    whoami:()=>say('tosse'),
+    uname:()=>say('Tosse OS 0.1 (Zorin base) x86_64 · voice+gesture stack'),
+    date:()=>say(new Date().toString()),
+    eva:()=>{say('waking the assistant…','dim');openAppWindow('Eva')},
+    volume:()=>say('volume: '+volume+'%'),
+    gestures:()=>say('tracking: '+(tracking?'live · 21 landmarks':'off')),
+    clear:()=>{out.innerHTML=''}
+  };
+  inp.addEventListener('keydown',e=>{
+    e.stopPropagation();
+    if(e.key!=='Enter')return;
+    const raw=inp.value.trim();inp.value='';
+    if(!raw)return;
+    say('tosse@zenvx:~$ '+raw,'echo');
+    const [c,...rest]=raw.split(' ');
+    if(c==='echo')say(rest.join(' '));
+    else if(CMDS[c])CMDS[c]();
+    else say(c+': command not found','err');
+  });
+  setTimeout(()=>inp.focus(),80);
+}};
+
+APPDEF.Photos={w:480,h:360,render(b){
+  const grads=['#4f7cff,#9d6bff','#ff6b9d,#ffb84f','#4fd1ff,#4fffa3','#ffd24f,#ff6b6b',
+    '#9d6bff,#ff6bd6','#4fffa3,#4fd1ff','#8f9bff,#c9b6ff','#ff9d4f,#ffd24f','#6bffd6,#4f7cff'];
+  b.innerHTML='<div class="photos" id="pGrid"></div><p class="wnote">Nine generated frames — click one to open it.</p>';
+  b.querySelector('#pGrid').innerHTML=grads.map((g,i)=>
+    '<button class="ph" style="background:linear-gradient(135deg,'+g+')" data-i="'+(i+1)+'"></button>').join('');
+  b.querySelectorAll('.ph').forEach(p=>p.addEventListener('click',()=>{
+    p.classList.toggle('zoom');showToast('IMG_000'+p.dataset.i+'.png')}));
+}};
+
+APPDEF.Mail={w:520,h:360,render(b){
+  const mail=[['ZenvX Team','Render deploy is live','The static site went out — voice + gesture stack included.'],
+    ['Anandi Rao','Re: monsoon session','Sending stems tonight. Loved the gesture demo.'],
+    ['Zorin Group','Base image notes','Kernel 6.9 pins are in the attached manifest.'],
+    ['Privacy Desk','On-device review','Confirmed: no audio leaves the browser in Whisper mode.'],
+    ['Meera S','Voice grammar v3','Added Malayalam command aliases for the launcher.']];
+  b.innerHTML='<div class="mail"><ul class="mlist" id="mList"></ul><div class="mread" id="mRead">'
+    +'<p class="wsub">Select a message.</p></div></div>';
+  b.querySelector('#mList').innerHTML=mail.map((m,i)=>
+    '<li><button data-i="'+i+'"><b>'+m[0]+'</b><span>'+m[1]+'</span></button></li>').join('');
+  b.querySelectorAll('#mList button').forEach(btn=>btn.addEventListener('click',()=>{
+    const m=mail[+btn.dataset.i];
+    b.querySelectorAll('#mList button').forEach(x=>x.classList.remove('on'));
+    btn.classList.add('on');
+    b.querySelector('#mRead').innerHTML='<h4>'+m[1]+'</h4><p class="wsub">from '+m[0]+'</p><p>'+m[2]+'</p>';
+  }));
+}};
+
+APPDEF.Settings={w:460,h:360,render(b){
+  b.innerHTML='<div class="setts">'
+    +'<label class="srow"><span>System volume</span><input type="range" id="sVol" min="0" max="100" /></label>'
+    +'<div class="srow"><span>Workspace</span><div class="segs" id="sWs"></div></div>'
+    +'<div class="srow"><span>Accent</span><div class="swatches" id="sAcc"></div></div>'
+    +'<label class="srow"><span>Wake word required</span><input type="checkbox" id="sWake" /></label>'
+    +'<label class="srow"><span>Camera ghost overlay</span><input type="checkbox" id="sGhost" /></label>'
+    +'<p class="wnote">These switches drive the live preview, not a stored profile.</p></div>';
+  const $$=s=>b.querySelector(s);
+  const vol=$$('#sVol');vol.value=String(volume);
+  vol.addEventListener('input',()=>{volume=+vol.value;osd('Volume '+volume+'%',volume)});
+  $$('#sWs').innerHTML=wsNames.map((n,i)=>'<button data-i="'+i+'"'+(i===wsIndex?' class="on"':'')+'>'+(i+1)+'</button>').join('');
+  $$('#sWs').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+    switchWorkspace(+t.dataset.i-wsIndex);
+    $$('#sWs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.i===wsIndex))});
+  const accents=['#7c9cff','#9d6bff','#4fd1ff','#4fffa3','#ffd24f','#ff6b9d'];
+  $$('#sAcc').innerHTML=accents.map(c=>'<button style="background:'+c+'" data-c="'+c+'"></button>').join('');
+  $$('#sAcc').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+    document.documentElement.style.setProperty('--accent',t.dataset.c);showToast('Accent updated')});
+  const wk=$$('#sWake');wk.checked=wakeMode;wk.addEventListener('change',()=>setWake(wk.checked));
+  const gh=$$('#sGhost');gh.checked=ghostOn;gh.addEventListener('change',()=>setGhost(gh.checked));
+}};
+
+APPDEF.Accessibility={w:440,h:320,render(b){
+  const opts=[['a11y-large','Larger interface text'],['a11y-contrast','High contrast'],
+    ['a11y-motion','Reduce motion'],['a11y-underline','Underline all links & buttons']];
+  b.innerHTML='<div class="setts">'+opts.map(([k,l])=>
+    '<label class="srow"><span>'+l+'</span><input type="checkbox" data-k="'+k+'"'
+    +(document.body.classList.contains(k)?' checked':'')+' /></label>').join('')
+    +'<p class="wnote">Each switch applies to this preview immediately.</p></div>';
+  b.querySelectorAll('input[data-k]').forEach(i=>i.addEventListener('change',()=>{
+    document.body.classList.toggle(i.dataset.k,i.checked);
+    showToast(i.checked?'Enabled':'Disabled')}));
+}};
+
+APPDEF.Focus={w:340,h:300,render(b,rec){
+  b.innerHTML='<div class="focus"><div class="ftime" id="fT">25:00</div>'
+    +'<div class="fctl"><button class="wbtn" id="fGo">Start</button>'
+    +'<button class="wbtn" id="fRe">Reset</button></div>'
+    +'<p class="wsub" id="fMsg">Notifications stay quiet while a session runs.</p></div>';
+  let left=25*60,run=false,iv=null;
+  const draw=()=>b.querySelector('#fT').textContent=Math.floor(left/60)+':'+pad2(left%60);
+  const set=r=>{run=r;b.querySelector('#fGo').textContent=r?'Pause':'Start';
+    clearInterval(iv);
+    if(r)iv=setInterval(()=>{left--;draw();
+      if(left<=0){clearInterval(iv);run=false;b.querySelector('#fGo').textContent='Start';
+        b.querySelector('#fMsg').textContent='Session complete.';showToast('Focus session complete')}},1000)};
+  b.querySelector('#fGo').addEventListener('click',()=>set(!run));
+  b.querySelector('#fRe').addEventListener('click',()=>{left=25*60;draw();set(false)});
+  rec.el._cleanup=()=>clearInterval(iv);draw();
+}};
+
+APPDEF.Privacy={w:460,h:340,render(b,rec){
+  b.innerHTML='<div class="privacy"><ul class="plist" id="pList"></ul>'
+    +'<button class="wbtn" id="pWipe">Forget my preferences</button>'
+    +'<p class="wnote">Sensors are opt-in, shown in the topbar whenever active, and Escape cuts the camera instantly.</p></div>';
+  const draw=()=>{
+    const rows=[['Microphone',micStream?'live':'off',!!micStream],
+      ['Camera',tracking?'live':'off',tracking],
+      ['Speech engine',engine==='none'?'off':engine,engine!=='none'],
+      ['Audio leaves device',engine==='whisper'?'never (on-device)':engine==='native'?'browser speech service':'—',false],
+      ['Stored locally','sensor choices, notes, wake word',false]];
+    b.querySelector('#pList').innerHTML=rows.map(([k,v,on])=>
+      '<li><span>'+k+'</span><b class="'+(on?'live':'')+'">'+v+'</b></li>').join('');
+  };
+  const iv=setInterval(draw,1000);rec.el._cleanup=()=>clearInterval(iv);
+  b.querySelector('#pWipe').addEventListener('click',()=>{
+    try{['setup','mic','cam','engine','wake','notes'].forEach(k=>localStorage.removeItem('tosseos.'+k))}catch(_){}
+    showToast('Local preferences cleared')});
+  draw();
+}};
+
+APPDEF.Browser={w:540,h:360,render(b){
+  b.innerHTML='<div class="brow"><div class="burl"><span>🔒</span>'
+    +'<input id="bU" value="tosseos.dev/experience" spellcheck="false" /></div>'
+    +'<div class="bpage" id="bP"></div></div>';
+  const page=b.querySelector('#bP'),u=b.querySelector('#bU');
+  const draw=()=>page.innerHTML='<h4>Tosse OS</h4><p class="wsub">'+u.value+'</p>'
+    +'<p>A sandboxed preview surface. Real browsing is out of scope for the demo, '
+    +'but the window, focus and gesture-click paths are the same as any other app.</p>';
+  u.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')draw()});draw();
+}};
+
+APPDEF['App Store']={w:460,h:360,render(b){
+  const list=[['Eva Voice Packs','4 languages','12 MB'],['Gesture Studio Pro','custom pose bindings','8 MB'],
+    ['Zorin Themes','14 desktop looks','32 MB'],['Screen Reader+','offline TTS voices','54 MB'],
+    ['Kernel Tools','diagnostics','6 MB']];
+  b.innerHTML='<ul class="store" id="stList"></ul><p class="wnote">Catalogue is illustrative — nothing installs.</p>';
+  b.querySelector('#stList').innerHTML=list.map((a,i)=>
+    '<li><span><b>'+a[0]+'</b><small>'+a[1]+' · '+a[2]+'</small></span>'
+    +'<button class="wbtn" data-i="'+i+'">Install</button></li>').join('');
+  b.querySelectorAll('#stList button').forEach(btn=>btn.addEventListener('click',()=>{
+    btn.textContent='Installed';btn.disabled=true;showToast(list[+btn.dataset.i][0]+' installed')}));
+}};
+
+APPDEF.Studio={w:460,h:300,render(b,rec){
+  b.innerHTML='<canvas id="stWave" class="wave"></canvas>'
+    +'<p class="wnote">Live waveform — driven by your microphone when voice is on, simulated otherwise.</p>';
+  const c=b.querySelector('#stWave');let raf=null;
+  const loop=()=>{
+    const w=c.width=c.clientWidth,h=c.height=c.clientHeight,ctx=c.getContext('2d');
+    ctx.clearRect(0,0,w,h);ctx.lineWidth=2;ctx.strokeStyle='rgba(143,176,255,.9)';
+    ctx.beginPath();
+    const t=performance.now()/380, amp=micStream?h*0.3:h*0.16;
+    for(let x=0;x<w;x++){const y=h/2+Math.sin(x/26+t)*amp*Math.sin(x/150+t/2);
+      x?ctx.lineTo(x,y):ctx.moveTo(x,y)}
+    ctx.stroke();raf=requestAnimationFrame(loop)};
+  loop();rec.el._cleanup=()=>cancelAnimationFrame(raf);
+}};
+
+APPDEF._fallback={w:420,h:220,render(b){
+  b.innerHTML='<p class="wnote">This module is a placeholder in the preview — the window, focus, '
+    +'drag, voice and gesture-click paths all work the same as the built-out apps.</p>'}};
+
+/* every launcher entry, desktop icon and dock button routes through here */
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-app]');
+  if(a){e.preventDefault();openAppWindow(a.dataset.app)}
+});
+// ---------- First-run setup: ask for the sensors at launch ----------
+const boot=document.querySelector('#boot'),bootMic=document.querySelector('#bootMic'),bootCam=document.querySelector('#bootCam'),
+      bootEnter=document.querySelector('#bootEnter'),bootHint=document.querySelector('#bootHint');
+let permMic='unknown',permCam='unknown',asking=false,starting=false,triedAsk=false;
+const secure=window.isSecureContext!==false&&!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+async function permState(name){try{const p=await navigator.permissions.query({name:name});return p.state}catch(_){return 'unknown'}}
+/* One combined prompt is one decision for the person. The tracks are stopped
+   immediately: MediaPipe's Camera helper has to own its own getUserMedia call,
+   and startMic re-opens audio itself. This call exists only to get the grant. */
+async function requestSensors(){
+  if(!secure)return{mic:'insecure',cam:'insecure'};
+  const drop=st=>st.getTracks().forEach(t=>t.stop());
+  try{drop(await navigator.mediaDevices.getUserMedia({audio:true,video:true}));return{mic:'granted',cam:'granted'}}catch(_){}
+  /* the error name alone is not trustworthy across browsers, so a failure is
+     confirmed against the Permissions API before it is called a refusal */
+  const why=async(e,name)=>{
+    if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))return 'denied';
+    if(e&&e.name==='NotFoundError')return 'missing';
+    return (await permState(name))==='denied'?'denied':'error'};
+  const out={mic:'error',cam:'error'};
+  try{drop(await navigator.mediaDevices.getUserMedia({audio:true}));out.mic='granted'}catch(e){out.mic=await why(e,'microphone')}
+  try{drop(await navigator.mediaDevices.getUserMedia({video:true}));out.cam='granted'}catch(e){out.cam=await why(e,'camera')}
+  return out;
+}
+const SLABEL={granted:'On',denied:'Blocked',missing:'No device',error:'Unavailable',insecure:'Needs HTTPS'};
+function bootRow(el,live,perm){
+  const txt=live?'On':starting?'Starting…':asking?'Asking…':SLABEL[perm]||'Off';
+  el.querySelector('.st').textContent=txt;
+  el.classList.toggle('on',live);
+  el.classList.toggle('busy',!live&&(asking||starting));
+  el.classList.toggle('blocked',!live&&!asking&&!starting&&(perm==='denied'||perm==='insecure'));
+}
+function syncBoot(){
+  if(!document.body.contains(boot))return;
+  bootRow(bootMic,!!micStream,permMic);bootRow(bootCam,tracking,permCam);
+  const ask=document.querySelector('#bootAsk');
+  if(ask)ask.innerHTML=asking?'Your browser is asking for both right now \u2014 choose <b>Allow</b>.':
+    (!!micStream&&tracking)?'Both are on.':(!!micStream||tracking)?'One of the two is on.':'';
+  const live=!!micStream||tracking,blocked=permMic==='denied'||permCam==='denied';
+  document.querySelector('#bootSkip').hidden=live;   /* meaningless once a sensor is on */
+  bootEnter.disabled=asking||starting;
+  bootEnter.textContent=asking?'Waiting for your permission…':starting?'Starting up…':live?'Enter the desktop':blocked?'Try again':'Allow microphone & camera';
+  bootHint.classList.toggle('warn',!live&&!asking&&!starting&&(blocked||!secure));
+  bootHint.textContent=
+    !secure?'Camera and microphone need an HTTPS address. Open the https:// version of this page.':
+    asking?'Choose Allow in your browser\u2019s permission prompt.':
+    starting?'Permission granted \u2014 loading the on-device models.':
+    live?'Ready. Voice and gestures run entirely on this device.':
+    blocked&&triedAsk?'Your browser is still refusing, and it will not ask again on its own. Open the camera or lock icon in the address bar, set Microphone and Camera to Allow, then press Try again.':
+    blocked?'Blocked for this site. Open the camera or lock icon in the address bar, set Microphone and Camera to Allow, then press the button again.':
+    (permMic==='error'||permCam==='error')?'Your browser did not hand over the microphone or camera. Close anything else that might be using them, then press the button again.':
+    (permMic==='missing'&&permCam==='missing')?'No microphone or camera was found on this device. The keyboard controls still work.':
+    'Nothing has been allowed yet. Press the button to ask again, or continue with the keyboard.';
+}
+async function askSensors(){
+  if(asking||starting)return;
+  asking=true;syncBoot();
+  /* a blocked permission rejects instantly, so hold the asking state long
+     enough to be seen — otherwise pressing the button looks like a dead end */
+  const [st]=await Promise.all([requestSensors(),new Promise(r=>setTimeout(r,380))]);
+  permMic=st.mic;permCam=st.cam;asking=false;triedAsk=true;
+  starting=st.mic==='granted'||st.cam==='granted';syncBoot();
+  await Promise.all([
+    st.cam==='granted'?startCamera().catch(()=>{}):null,
+    st.mic==='granted'?startMic().catch(()=>{}):null
+  ]);
+  starting=false;syncBoot();
+}
+bootMic.addEventListener('click',async()=>{if(micStream){stopMic()}else if(permMic==='granted'){starting=true;syncBoot();await startMic().catch(()=>{});starting=false}else{await askSensors()}syncBoot()});
+bootCam.addEventListener('click',async()=>{if(tracking){stopCamera()}else if(permCam==='granted'){starting=true;syncBoot();await startCamera().catch(()=>{});starting=false}else{await askSensors()}syncBoot()});
+function enterDesktop(fromBoot){try{localStorage.setItem('tosseos.setup','1')}catch(_){}if(document.body.contains(boot))boot.remove();if(fromBoot){if(micStream)setTimeout(()=>showToast('Voice control is live \u2014 press Space and say \u201chelp\u201d anytime.'),400);else if(tracking)setTimeout(()=>showToast('Gesture control is live \u2014 show a hand, or press G for the guide.'),400)}}
+bootEnter.addEventListener('click',()=>{if(micStream||tracking)enterDesktop(true);else askSensors()});
+document.querySelector('#bootSkip').addEventListener('click',()=>{try{localStorage.setItem('tosseos.declined','1')}catch(_){}enterDesktop(true)});
+(async function initSensors(){
+  let done=false,mic=false,cam=false,declined=false;
+  try{done=localStorage.getItem('tosseos.setup')==='1';mic=localStorage.getItem('tosseos.mic')==='1';
+      cam=localStorage.getItem('tosseos.cam')==='1';declined=localStorage.getItem('tosseos.declined')==='1'}catch(_){}
+  /* Skip the card only if a sensor was already in use, or the person said no on
+     purpose. Otherwise ask again — a setup that was never completed is not a
+     reason to never ask. */
+  if(done&&(mic||cam||declined)){boot.remove();if(cam)startCamera();if(mic)startMic();return}
+  permMic=await permState('microphone');permCam=await permState('camera');
+  boot.hidden=false;syncBoot();
+  if(permMic==='denied'&&permCam==='denied')return;          // asking again would be silent
+  requestAnimationFrame(()=>setTimeout(askSensors,260));      // let the card paint first
+})();
+function updateClock(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}updateClock();setInterval(updateClock,30000);
+</script>
+</body>
+</html>

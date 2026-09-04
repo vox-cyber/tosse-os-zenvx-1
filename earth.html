@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Hand-Controlled Galaxy Sandbox</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #010105;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        #webcam-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: 110px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.25);
+            z-index: 10;
+            transform: scaleX(-1);
+            background: #050510;
+        }
+        
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(4, 4, 12, 0.8);
+            padding: 12px 28px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            color: #ffffff;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+        }
+        
+        #status-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background-color: #ff4444;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px #ff4444;
+            transition: all 0.3s ease;
+        }
+        
+        #status-text {
+            color: #00ffcc;
+            font-weight: 600;
+        }
+        #controls { position:absolute; left:20px; top:86px; z-index:20; width:250px; padding:14px; border:1px solid rgba(255,255,255,.16); border-radius:14px; color:#fff; background:rgba(5,7,15,.72); backdrop-filter:blur(16px); box-shadow:0 14px 40px rgba(0,0,0,.35); }
+        #controls h2 { font-size:14px; margin-bottom:6px; }
+        #controls p { color:#aeb7c8; font-size:11px; line-height:1.5; margin-bottom:11px; }
+        .control-row { display:flex; gap:7px; flex-wrap:wrap; }
+        .control-btn { min-height:40px; padding:0 12px; border-radius:9px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.08); color:#fff; cursor:pointer; font-weight:700; font-size:11px; }
+        .control-btn.primary { color:#07100d; background:#65e4b2; border-color:#65e4b2; }
+        .control-btn:hover { background:rgba(255,255,255,.15); }
+        .control-btn.primary:hover { background:#87efc7; }
+        #privacy-note { margin-top:10px!important; margin-bottom:0!important; color:#7f899d!important; }
+        #pointer { position:absolute; z-index:15; width:24px; height:24px; border:2px solid #70f1c0; border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); opacity:0; box-shadow:0 0 18px #00ffcc; transition:opacity .15s; }
+        #pointer:after { content:""; position:absolute; inset:7px; border-radius:50%; background:#fff; }
+        canvas { cursor:grab; touch-action:none; }
+        canvas:active { cursor:grabbing; }
+        @media(max-width:700px){#webcam-container{width:110px;height:82px;top:82px;right:12px}#controls{left:12px;top:auto;bottom:76px;width:calc(100% - 24px)}#controls p{display:none}#ui-overlay{bottom:16px;max-width:calc(100% - 24px);padding:10px 16px;font-size:.68rem}}
+    </style>
+    <!-- Core Graphic Engines & TensorFlow Vision Hand Pipeline -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="webcam-container">
+        <video id="webcam" autoplay playsinline></video>
+    </div>
+
+    <div id="pointer"></div>
+    <aside id="controls">
+        <h2>Gesture + Pointer Controls</h2>
+        <p>Move your hand to rotate. Pinch to zoom. Or drag with a mouse/finger, scroll to zoom, and use arrow keys.</p>
+        <div class="control-row"><button id="camera-toggle" class="control-btn primary">Enable camera</button><button id="reset-view" class="control-btn">Reset view</button></div>
+        <p id="privacy-note">Camera frames stay in this browser session and are processed by MediaPipe.</p>
+    </aside>
+    <div id="ui-overlay">
+        <span id="status-dot"></span> STATUS: <span id="status-text">POINTER MODE READY • CAMERA OFF</span>
+    </div>
+
+    <script>
+        // --- 3D SCENE & COSMOLOGY VARIABLES ---
+        let container, scene, camera, renderer;
+        let cosmicGroup, earth, clouds, atmosphere, galaxyParticles;
+        let asteroids = [];
+
+        // Smooth Interpolation target variables (Lerp Engine)
+        let currentRotationX = 0.2,
+            currentRotationY = 0;
+        let targetRotationX = 0.2,
+            targetRotationY = 0;
+
+        let lastHandX = null,
+            lastHandY = null;
+        let handPresent = false;
+        let cameraUtils = null, trackingStarted = false, handsEngine = null, lastPinchDistance = null;
+
+        init3D();
+        setupPointerControls();
+        document.getElementById('camera-toggle').addEventListener('click', toggleTracking);
+        document.getElementById('reset-view').addEventListener('click', resetView);
+        animate();
+
+        function init3D() {
+            container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            // Added space depth fog
+            scene.fog = new THREE.FogExp2(0x010105, 0.012);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 14;
+
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Dynamic optimization
+            container.appendChild(renderer.domElement);
+
+            // Master structural group containing all bodies
+            cosmicGroup = new THREE.Group();
+            scene.add(cosmicGroup);
+
+            // Dynamic Stellar Lighting
+            scene.add(new THREE.AmbientLight(0x1a1a3a));
+
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            sunLight.position.set(6, 4, 7).normalize();
+            scene.add(sunLight);
+
+            // Backlighting for deep nebula glow effect
+            const nebulaLight = new THREE.PointLight(0x00aaff, 2.5, 30);
+            nebulaLight.position.set(-6, -3, -5);
+            scene.add(nebulaLight);
+
+            // Generate Material Textures
+            const earthTexture = createEarthTexture();
+            const cloudTexture = createCloudTexture();
+
+            // Earth setup
+            earth = new THREE.Mesh(
+                new THREE.SphereGeometry(3.5, 64, 64),
+                new THREE.MeshStandardMaterial({
+                    map: earthTexture,
+                    roughness: 0.65,
+                    metalness: 0.15
+                })
+            );
+            cosmicGroup.add(earth);
+
+            // Clouds setup
+            clouds = new THREE.Mesh(
+                new THREE.SphereGeometry(3.55, 64, 64),
+                new THREE.MeshStandardMaterial({
+                    map: cloudTexture,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending,
+                    opacity: 0.4
+                })
+            );
+            cosmicGroup.add(clouds);
+
+            // Thick blue protective atmosphere layer
+            atmosphere = new THREE.Mesh(
+                new THREE.SphereGeometry(3.68, 32, 32),
+                new THREE.MeshBasicMaterial({
+                    color: 0x00aaff,
+                    side: THREE.BackSide,
+                    transparent: true,
+                    opacity: 0.15,
+                    blending: THREE.AdditiveBlending
+                })
+            );
+            cosmicGroup.add(atmosphere);
+
+            // Build Cosmic Environment Components
+            buildCinematicGalaxy();
+            buildAsteroidBelt();
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        // Procedural Continents Map
+        function createEarthTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#05102a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < 400; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const r = Math.random() * 110 + 20;
+                const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+                grad.addColorStop(0, '#16522b');
+                grad.addColorStop(0.5, '#0e331b');
+                grad.addColorStop(0.8, '#1b435a');
+                grad.addColorStop(1, 'rgba(5,16,42,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // Procedural Swirling Clouds Map
+        function createCloudTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < 200; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const w = Math.random() * 350 + 50;
+                const h = Math.random() * 25 + 6;
+                const grad = ctx.createLinearGradient(x, y, x + w, y);
+                grad.addColorStop(0, 'rgba(255,255,255,0)');
+                grad.addColorStop(0.5, 'rgba(255,255,255,0.75)');
+                grad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(x, y, w, h);
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // Generates dense realistic nebula star fields
+        function buildCinematicGalaxy() {
+            const starCount = 6000;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(starCount * 3);
+            const colors = new Float32Array(starCount * 3);
+
+            // Nebula palette matched to image spectrum
+            const palette = [
+                new THREE.Color(0x00f3ff), // Electric Cyan
+                new THREE.Color(0xae5aff), // Hot Purple/Magenta
+                new THREE.Color(0xffffff), // Pure Starlight Core
+                new THREE.Color(0x3a66ff) // Deep Cosmos Blue
+            ];
+
+            for (let i = 0; i < starCount; i++) {
+                const dist = Math.random() * 55 + 6;
+                const angle = dist * 0.25;
+                const spiralArm = (i % 3) * ((2 * Math.PI) / 3); // Three grand spiral arms
+
+                positions[i * 3] = Math.cos(angle + spiralArm) * dist + (Math.random() - 0.5) * 4;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * (6 - dist * 0.08);
+                positions[i * 3 + 2] = Math.sin(angle + spiralArm) * dist + (Math.random() - 0.5) * 4;
+
+                const clr = palette[Math.floor(Math.random() * palette.length)];
+                colors[i * 3] = clr.r;
+                colors[i * 3 + 1] = clr.g;
+                colors[i * 3 + 2] = clr.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const pCanvas = document.createElement('canvas');
+            pCanvas.width = 16;
+            pCanvas.height = 16;
+            const pCtx = pCanvas.getContext('2d');
+            const pGrad = pCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            pGrad.addColorStop(0, 'rgba(255,255,255,1)');
+            pGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            pCtx.fillStyle = pGrad;
+            pCtx.fillRect(0, 0, 16, 16);
+
+            galaxyParticles = new THREE.Points(geometry, new THREE.PointsMaterial({
+                size: 0.25,
+                map: new THREE.CanvasTexture(pCanvas),
+                vertexColors: true,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            }));
+            cosmicGroup.add(galaxyParticles);
+        }
+
+        // Generates an explicit ring array of individual 3D solid asteroids
+        function buildAsteroidBelt() {
+            const count = 120;
+            const rockMaterial = new THREE.MeshStandardMaterial({
+                color: 0x736c65,
+                roughness: 0.9,
+                metalness: 0.1
+            });
+
+            for (let i = 0; i < count; i++) {
+                // Generate irregular rock structures geometries
+                const radius = Math.random() * 0.12 + 0.04;
+                const geometry = new THREE.DodecahedronGeometry(radius, 1);
+
+                // Distort vertices slightly to make them unique and non-spherical
+                const pos = geometry.attributes.position;
+                for (let j = 0; j < pos.count; j++) {
+                    pos.setX(j, pos.getX(j) + (Math.random() - 0.5) * 0.03);
+                    pos.setY(j, pos.getY(j) + (Math.random() - 0.5) * 0.03);
+                    pos.setZ(j, pos.getZ(j) + (Math.random() - 0.5) * 0.03);
+                }
+
+                const asteroid = new THREE.Mesh(geometry, rockMaterial);
+
+                // Position in an orbital ring sequence surrounding Earth
+                const orbitalRadius = Math.random() * 2.2 + 5.0; // Snug circle outside atmosphere
+                const angle = (i / count) * Math.PI * 2 + Math.random() * 0.2;
+
+                asteroid.position.x = Math.cos(angle) * orbitalRadius;
+                asteroid.position.y = (Math.random() - 0.5) * 1.2; // Ring thickness skew
+                asteroid.position.z = Math.sin(angle) * orbitalRadius;
+
+                // Unique rotational axis spin speeds
+                asteroid.userData = {
+                    orbitSpeed: Math.random() * 0.004 + 0.002,
+                    spinX: Math.random() * 0.02,
+                    spinY: Math.random() * 0.02,
+                    radius: orbitalRadius,
+                    angle: angle
+                };
+
+                cosmicGroup.add(asteroid);
+                asteroids.push(asteroid);
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- COMPUTER VISION TRACKING ENGINE (EXPONENTIAL FILTERED) ---
+        async function setupTracking() {
+            if (trackingStarted) return;
+            const videoElement = document.getElementById('webcam');
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+
+            if (typeof Hands === 'undefined' || typeof Camera === 'undefined') {
+                statusText.innerText = "TRACKING LIBRARIES UNAVAILABLE • POINTER MODE ACTIVE";
+                throw new Error('MediaPipe failed to load');
+            }
+            const hands = handsEngine = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.45,
+                minTrackingConfidence: 0.45
+            });
+
+            hands.onResults((results) => {
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    statusDot.style.backgroundColor = '#00ffcc';
+                    statusDot.style.boxShadow = '0 0 12px #00ffcc';
+                    statusText.innerText = "ACTIVE: MANIPULATING COSMOS";
+                    handPresent = true;
+
+                    const marks = results.multiHandLandmarks[0];
+                    const palm = marks[0]; // Wrist/Palm core vector
+                    const pointer = document.getElementById('pointer');
+                    pointer.style.left = ((1 - marks[8].x) * window.innerWidth) + 'px';
+                    pointer.style.top = (marks[8].y * window.innerHeight) + 'px';
+                    pointer.style.opacity = '1';
+                    const pinchDistance = Math.hypot(marks[4].x - marks[8].x, marks[4].y - marks[8].y);
+                    if (lastPinchDistance !== null) camera.position.z = Math.max(8, Math.min(24, camera.position.z + (lastPinchDistance - pinchDistance) * 18));
+                    lastPinchDistance = pinchDistance;
+
+                    if (lastHandX !== null && lastHandY !== null) {
+                        const deltaX = palm.x - lastHandX;
+                        const deltaY = palm.y - lastHandY;
+
+                        // Target vector accumulations (Inverted X matches mirroring)
+                        targetRotationY -= deltaX * 3.8;
+                        targetRotationX += deltaY * 3.8;
+                    }
+
+                    lastHandX = palm.x;
+                    lastHandY = palm.y;
+                } else {
+                    statusDot.style.backgroundColor = '#ffbb00';
+                    statusDot.style.boxShadow = '0 0 12px #ffbb00';
+                    statusText.innerText = "STANDBY: SCANNING FOR HAND...";
+                    handPresent = false;
+                    lastHandX = null;
+                    lastHandY = null;
+                    lastPinchDistance = null;
+                    document.getElementById('pointer').style.opacity = '0';
+                }
+            });
+
+            cameraUtils = new Camera(videoElement, {
+                onFrame: async() => {
+                    await hands.send({
+                        image: videoElement
+                    });
+                },
+                width: 640,
+                height: 480
+            });
+
+            await cameraUtils.start();
+            trackingStarted = true;
+            document.getElementById('camera-toggle').textContent = 'Disable camera';
+            document.getElementById('camera-toggle').classList.remove('primary');
+            statusText.innerText = "CAMERA LIVE • SHOW ONE HAND";
+        }
+
+        function setupPointerControls() {
+            const el = document.getElementById('canvas-container'); let dragging=false, x=0, y=0;
+            el.addEventListener('pointerdown', ev => { dragging=true; x=ev.clientX; y=ev.clientY; el.setPointerCapture(ev.pointerId); });
+            el.addEventListener('pointermove', ev => { if(!dragging) return; targetRotationY += (ev.clientX-x)*0.008; targetRotationX += (ev.clientY-y)*0.008; x=ev.clientX; y=ev.clientY; });
+            el.addEventListener('pointerup', () => dragging=false); el.addEventListener('pointercancel', () => dragging=false);
+            el.addEventListener('wheel', ev => { ev.preventDefault(); camera.position.z=Math.max(8,Math.min(24,camera.position.z+ev.deltaY*.012)); }, {passive:false});
+            window.addEventListener('keydown', ev => { const d=.16;if(ev.key==='ArrowLeft')targetRotationY-=d;if(ev.key==='ArrowRight')targetRotationY+=d;if(ev.key==='ArrowUp')targetRotationX-=d;if(ev.key==='ArrowDown')targetRotationX+=d;if(ev.key==='+'||ev.key==='=')camera.position.z=Math.max(8,camera.position.z-.7);if(ev.key==='-')camera.position.z=Math.min(24,camera.position.z+.7); });
+        }
+        function resetView(){ targetRotationX=.2; targetRotationY=0; camera.position.z=14; }
+        async function toggleTracking(){ const statusText=document.getElementById('status-text'),btn=document.getElementById('camera-toggle'); if(trackingStarted){ const video=document.getElementById('webcam'); if(video.srcObject)video.srcObject.getTracks().forEach(t=>t.stop()); trackingStarted=false; handPresent=false; cameraUtils=null; btn.textContent='Enable camera';btn.classList.add('primary');statusText.innerText='POINTER MODE READY • CAMERA OFF';document.getElementById('pointer').style.opacity='0';return;} btn.textContent='Requesting…';try{await setupTracking()}catch(err){btn.textContent='Try camera again';btn.classList.add('primary');statusText.innerText='CAMERA BLOCKED OR UNAVAILABLE • POINTER MODE ACTIVE';console.warn(err)} }
+
+        // --- RENDERING LOOP WITH EXPONENTIAL SMOOTHING ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Ultra-Smooth Interpolation (0.07 filter weight yields hydraulic precision)
+            currentRotationY += (targetRotationY - currentRotationY) * 0.07;
+            currentRotationX += (targetRotationX - currentRotationX) * 0.07;
+
+            cosmicGroup.rotation.y = currentRotationY;
+            cosmicGroup.rotation.x = currentRotationX;
+
+            // Constant internal systems orbits
+            earth.rotation.y += 0.001;
+            clouds.rotation.y += 0.0014;
+            galaxyParticles.rotation.y += 0.00015;
+
+            // Compute asteroid belt orbital paths around Earth
+            for (let i = 0; i < asteroids.length; i++) {
+                const rock = asteroids[i];
+                rock.userData.angle += rock.userData.orbitSpeed;
+
+                rock.position.x = Math.cos(rock.userData.angle) * rock.userData.radius;
+                rock.position.z = Math.sin(rock.userData.angle) * rock.userData.radius;
+
+                // Spin individual asteroids on local axes
+                rock.rotation.x += rock.userData.spinX;
+                rock.rotation.y += rock.userData.spinY;
+            }
+
+            // Slow passive deceleration alignment when hand leaves visibility zone
+            if (!handPresent) {
+                targetRotationY += 0.0006;
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>
