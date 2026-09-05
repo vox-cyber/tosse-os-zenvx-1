@@ -9,7 +9,8 @@ node tests/test-gest.js            # 11-pose classifier, pointer mapping, pinch,
 node tests/test-voice.js           # 23 spoken commands, chaining, echo guard, persistence
 node tests/test-voicefix.js        # native engine silent death -> automatic on-device handover
 node tests/test-diag.js            # voice diagnostics panel, level meter, speaking latch
-node tests/test-apps.js            # all 16 app windows and the window manager
+node tests/test-apps.js            # every app window and the window manager
+node tests/test-extras.js          # Eva orb, custom pose lab, voice routines, screenshots, PWA
 ```
 
 Each script expects Chromium at `/usr/local/bin/chromium` and Playwright resolvable on

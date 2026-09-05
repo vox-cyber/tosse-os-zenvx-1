@@ -12,6 +12,14 @@ GitHub Pages). No build step, no bundler, no server code.
 
 ## What you can do in the preview
 
+### New in this drop
+
+- **Eva orb** — a living presence bubble (bottom-right) with idle / listening / thinking / speaking states, wired straight into the voice engine. Click it to open Eva.
+- **Pose Lab** — teach Eva *your own* hand signs: capture 3 samples, bind an action, and the sign fires it. Custom poses only match when none of the 11 built-ins fit; samples live in localStorage, on this device only.
+- **Routines** — voice macros: one phrase ("cinema mode") runs a chain of commands in order.
+- **Real screenshots** — ✌ Victory (or "take a screenshot") captures the actual desktop to a PNG via html2canvas.
+- **Offline PWA** — installable; after the first load the whole preview works with no network (service worker + web manifest).
+
 ### Permissions at launch
 
 The page asks for the **microphone and camera as soon as it opens** — no button to find first. One
@@ -65,7 +73,7 @@ On top of the raw solution:
 | ✊ Fist | closes every panel |
 | ✋ Open palm (held) | freezes the pointer |
 | 👆 / 👇 Point up / down | volume |
-| ✌ Victory | wakes Eva |
+| ✌ Victory | saves a screenshot (PNG download) |
 | 🤘 Horns | opens the gesture panel |
 | 👈 👉 Swipe | switches workspace |
 | ⌨ Arrow keys + Enter | move & click — no camera needed |

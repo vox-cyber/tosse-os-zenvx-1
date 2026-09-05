@@ -7,6 +7,9 @@
 <title>Tosse OS — Interactive Preview</title>
 <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous" data-cfasync="false"></script>
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#07080d" />
 <style>
 :root{--bg:#080a0f;--glass:rgba(20,23,31,.72);--glass2:rgba(255,255,255,.07);--line:rgba(255,255,255,.13);--text:#f7f8fb;--muted:#adb3c2;--accent:#7c9cff;--accent2:#bd7cff;--ok:#68d6a2;--warn:#ffcb72;--shadow:0 24px 70px rgba(0,0,0,.45)}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#070910;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -26,6 +29,46 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
 .enginestate{margin:9px auto 0;display:inline-block;font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;background:none;border:0;cursor:pointer;padding:3px 8px;border-radius:7px}.enginestate:hover{background:rgba(255,255,255,.07);color:#dfe3f0}.vcmd{margin:16px auto 0;display:flex;align-items:center;gap:9px;width:min(360px,100%);height:43px;border:1px solid var(--line);border-radius:11px;padding:0 12px;background:rgba(255,255,255,.06)}.vcmd:focus-within{border-color:rgba(143,176,255,.6)}.vcmd svg{width:16px;color:#aeb8d6;flex:0 0 auto}.vcmd input{width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:13px}
 @media(max-width:760px){.desktop{display:block;padding:14px}.icons{display:none}.stage{height:100%;padding:0 0 72px}.welcome{width:100%;display:block;max-height:calc(100vh - 150px);overflow:auto}.hero{padding:28px 24px 22px}.quick{border-left:0;border-top:1px solid var(--line);padding:16px}.quick h2{display:none}.feature{padding:10px}.topbar{padding:0 12px}.status .hide-m{display:none}.shortcut{display:none}.dock button{width:44px;height:44px}.dockwrap{bottom:10px}.dock{padding:7px}.apps{grid-template-columns:repeat(3,1fr)}h1{font-size:42px}.subtitle{font-size:14px}.gesture{left:14px;right:14px;bottom:78px;width:auto}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* ── Eva orb ─────────────────────────────────────────────── */
+#evaOrb{position:fixed;right:26px;bottom:96px;z-index:210;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;background:transparent;transition:transform .25s}
+#evaOrb:hover{transform:scale(1.07)}
+#evaOrb .orb-core{position:absolute;inset:10px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#dfe9ff 0%,#7c9cff 38%,#2b3a66 78%,#101828 100%);box-shadow:0 6px 24px rgba(124,156,255,.35);transition:box-shadow .4s}
+#evaOrb .orb-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 40%,rgba(124,156,255,.85) 50%,transparent 62% 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));animation:orbspin 9s linear infinite;opacity:.35;transition:opacity .4s}
+#evaOrb .orb-bars{position:absolute;inset:0;display:none;place-items:center;gap:2.5px}
+#evaOrb .orb-bars i{width:3px;height:10px;border-radius:2px;background:#fff;animation:orbbars 1s ease-in-out infinite}
+#evaOrb .orb-bars i:nth-child(2){animation-delay:.18s}#evaOrb .orb-bars i:nth-child(3){animation-delay:.36s}
+#evaOrb::after{content:'eva';position:absolute;left:50%;top:calc(100% + 5px);transform:translateX(-50%);font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+@keyframes orbspin{to{transform:rotate(360deg)}}
+@keyframes orbbars{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
+#evaOrb[data-state=idle] .orb-core{animation:orbbreathe 4.5s ease-in-out infinite}
+@keyframes orbbreathe{0%,100%{box-shadow:0 6px 24px rgba(124,156,255,.28)}50%{box-shadow:0 6px 30px rgba(124,156,255,.5)}}
+#evaOrb[data-state=listen] .orb-ring{opacity:1;animation-duration:5s}
+#evaOrb[data-state=listen] .orb-core{box-shadow:0 0 0 4px rgba(104,214,162,.18),0 6px 28px rgba(104,214,162,.5)}
+#evaOrb[data-state=think] .orb-ring{opacity:1;animation-duration:1.1s}
+#evaOrb[data-state=think] .orb-core{background:radial-gradient(circle at 34% 30%,#f2e4ff 0%,#b48cff 42%,#43307a 80%,#181028 100%)}
+#evaOrb[data-state=speak] .orb-ring{opacity:1;animation-duration:2.4s}
+#evaOrb[data-state=speak] .orb-bars{display:grid}
+@media (max-width:760px){#evaOrb{right:16px;bottom:86px;width:54px;height:54px}}
+
+/* ── Pose Lab + Routines apps ────────────────────────────── */
+.plstat{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-size:11.5px;font-weight:600;background:rgba(124,156,255,.1);border:1px solid rgba(124,156,255,.28);color:#cdd9ff;margin-bottom:12px}
+.plstat.off{background:rgba(255,170,70,.1);border-color:rgba(255,170,70,.3);color:#ffd9a8}
+.plfield{margin-bottom:11px}.plfield label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px}
+.plfield input,.plfield select{width:100%;padding:9px 12px;border-radius:9px;font:inherit;font-size:12.5px;color:#e6e9f2;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.12);outline:none}
+.plfield input:focus,.plfield select:focus{border-color:rgba(124,156,255,.6)}
+.plsamples{display:flex;gap:7px;margin:10px 0}
+.plsamples i{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.1)}
+.plsamples i.done{background:#68d6a2;box-shadow:0 0 8px rgba(104,214,162,.5)}
+.plposes{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.plposes li{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);font-size:12px}
+.plposes li b{flex:1;font-weight:700}
+.plposes li small{color:rgba(255,255,255,.5);font-size:10.5px}
+.pldel{border:none;cursor:pointer;border-radius:7px;padding:4px 9px;font-size:11px;color:#ffb4b4;background:rgba(255,90,90,.12)}
+.pldel:hover{background:rgba(255,90,90,.25)}
+.rtsteps{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:8px 0 12px}
+.rtsteps label{display:flex;align-items:center;gap:7px;font-size:11.5px;color:rgba(255,255,255,.7);padding:6px 8px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.rtsteps input{accent-color:#7c9cff}
 </style>
 </head>
 <body>
@@ -54,12 +97,12 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
 </nav></div>
 <section id="launcher" class="panel" aria-label="Application launcher"><label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr">Search apps</span><input id="appSearch" placeholder="Search apps, settings or ask Eva…" /></label><div class="apps" id="apps"></div></section>
 <section id="voice" class="voice" aria-label="Eva voice assistant"><button class="close" data-close="voice" aria-label="Close">×</button><div class="voicebox"><div class="rings"><button id="voiceMic" class="mic" aria-label="Enable microphone"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="3" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.9"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button></div><h2 id="voiceTitle">I’m listening.</h2><p id="voiceText">Tap the mic and speak — say &ldquo;help&rdquo; for commands.</p><div id="micState" class="micstate"><span class="dot"></span><span>Microphone off</span></div><button id="engineBtn" class="enginestate" type="button" title="Tap to switch voice engine">Voice engine: off</button><p id="voiceDiag" class="vdiag"></p><div class="vtoggles"><button id="speakToggle" type="button">Eva speaks back: on</button><button id="vdToggle" type="button">Voice diagnostics</button></div><div id="vdPanel" class="vdpanel"><div class="vdrow"><span>Engine</span><b id="vdEngine">off</b></div><div class="vdrow"><span>Microphone</span><b id="vdMic">off</b></div><div class="vdrow"><span>Input level</span><span class="vdmeter"><i id="vdLevel"></i></span><b id="vdLevelN">0.0000</b></div><div class="vdrow"><span>Audio frames</span><b id="vdFrames">0</b></div><div class="vdrow"><span>Speech gate</span><b id="vdGate">idle</b></div><div class="vdrow"><span>Last heard</span><b id="vdLast">—</b></div><div class="vdrow"><span>Last error</span><b id="vdErr">none</b></div><button class="wbtn" id="vdCopy" type="button">Copy diagnostics</button><p class="wnote">If the level bar stays flat while you talk, the microphone is not reaching the page. If it moves but nothing happens, send me this readout.</p></div><label class="vcmd"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="voiceCmd" placeholder='Or type a command — try "open terminal"' autocomplete="off" /></label><button id="wakeToggle" type="button">Wake word: off</button><div class="chips"><button class="chip">Open accessibility</button><button class="chip">Start focus mode</button><button class="chip">Show my files</button><button class="chip">What can I say?</button></div></div></section>
-<aside id="gesture" class="gesture" aria-label="Gesture control panel"><div class="gesturehead"><h3>Gesture Control</h3><span class="badge">ON-DEVICE · PRIVATE</span></div><div class="camview" id="camview"><video id="gestureCam" autoplay playsinline muted></video><canvas id="skel"></canvas><div class="camoff">Camera off.<br>Enable hand tracking, or drive the pointer with your keyboard.</div></div><div class="gstatus"><span class="gdot" id="gDot"></span><span id="gStatus">Gesture mode ready</span></div><div class="gactions"><button id="camToggle" class="gbtn primary">Enable camera</button><button id="ptrCenter" class="gbtn">Center pointer</button><button id="ghostToggle" class="gbtn wide">Ghost overlay: on</button></div><div class="poserow"><span>Detected pose</span><b id="gPose">none</b></div><ul class="guide"><li><span><i>☝</i> <b>Point</b> — index fingertip drives the pointer</span></li><li><span><i>🤏</i> <b>Pinch</b> — thumb + index, release to click</span></li><li><span><i>👌</i> <b>OK sign</b> — opens the app launcher</span></li><li><span><i>✊</i> <b>Fist</b> — closes every panel</span></li><li><span><i>✋</i> <b>Open palm</b> — hold to freeze the pointer</span></li><li><span><i>👆👇</i> <b>Point up / down</b> — volume</span></li><li><span><i>✌</i> <b>Victory</b> — wakes Eva</span></li><li><span><i>🤘</i> <b>Horns</b> — opens this panel</span></li><li><span><i>👈👉</i> <b>Swipe</b> — switches workspace</span></li><li><span><i>⌨</i> <b>Arrow keys + Enter</b> — move & click — no camera needed</span></li></ul></aside>
+<aside id="gesture" class="gesture" aria-label="Gesture control panel"><div class="gesturehead"><h3>Gesture Control</h3><span class="badge">ON-DEVICE · PRIVATE</span></div><div class="camview" id="camview"><video id="gestureCam" autoplay playsinline muted></video><canvas id="skel"></canvas><div class="camoff">Camera off.<br>Enable hand tracking, or drive the pointer with your keyboard.</div></div><div class="gstatus"><span class="gdot" id="gDot"></span><span id="gStatus">Gesture mode ready</span></div><div class="gactions"><button id="camToggle" class="gbtn primary">Enable camera</button><button id="ptrCenter" class="gbtn">Center pointer</button><button id="ghostToggle" class="gbtn wide">Ghost overlay: on</button></div><div class="poserow"><span>Detected pose</span><b id="gPose">none</b></div><ul class="guide"><li><span><i>☝</i> <b>Point</b> — index fingertip drives the pointer</span></li><li><span><i>🤏</i> <b>Pinch</b> — thumb + index, release to click</span></li><li><span><i>👌</i> <b>OK sign</b> — opens the app launcher</span></li><li><span><i>✊</i> <b>Fist</b> — closes every panel</span></li><li><span><i>✋</i> <b>Open palm</b> — hold to freeze the pointer</span></li><li><span><i>👆👇</i> <b>Point up / down</b> — volume</span></li><li><span><i>✌</i> <b>Victory</b> — saves a screenshot (PNG)</span></li><li><span><i>🤘</i> <b>Horns</b> — opens this panel</span></li><li><span><i>👈👉</i> <b>Swipe</b> — switches workspace</span></li><li><span><i>⌨</i> <b>Arrow keys + Enter</b> — move & click — no camera needed</span></li></ul></aside>
 <div id="camghost" aria-hidden="true"><video id="ghostCam" autoplay playsinline muted></video></div><div id="windows" class="windows"></div><div id="pointer" class="pointer" aria-hidden="true"></div><div id="gtag" aria-hidden="true"></div><div id="heard" role="status" aria-live="polite"></div><div id="osd" aria-hidden="true"><div class="osdlabel"></div><div class="osdbar"><span class="osdfill"></span></div></div>
 <div id="toast" class="toast" role="status"><strong>Tosse OS Preview</strong><p id="toastText"></p></div>
 <script>
-const apps=[['Browser','globe'],['Files','folder'],['Eva','wave'],['Settings','gear'],['Terminal','terminal'],['Music','music'],['Photos','photos'],['Mail','mail'],['Notes','notes'],['Calculator','calc'],['Weather','weather'],['App Store','store'],['Studio','spark'],['Accessibility','access'],['Focus','focus'],['Privacy','shield']];
-const icons={globe:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4a13 13 0 010 16M12 4a13 13 0 000 16"/>',folder:'<path d="M3.5 7h6l2-2h9v13h-17z"/>',wave:'<path d="M4 12c2 0 2-5 4-5s2 10 4 10 2-8 4-8 2 4 4 4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1m-8.6 8.6l-2.1 2.1"/>',spark:'<path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6z"/>',access:'<circle cx="12" cy="5" r="2"/><path d="M5 9h14M12 9v12m0-7l-5 6m5-6l5 6"/>',focus:'<path d="M8 4H4v4m12-4h4v4M8 20H4v-4m12 4h4v-4"/><circle cx="12" cy="12" r="3"/>',shield:'<path d="M12 3l7 3v5c0 4.8-2.9 8.1-7 10-4.1-1.9-7-5.2-7-10V6z"/><path d="M9 12l2 2 4-4"/>',terminal:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M6.5 9l3.5 3-3.5 3M12 15h5.5"/>',music:'<path d="M9 18V6l10-2v11"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="15" r="2.2"/>',photos:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4.5 17.5l4.5-4.5 3 3 3.5-3.5 4 4"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',notes:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8.5h6M9 12.5h6M9 16.5h4"/>',calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.7 12h.01M12 12h.01M15.3 12h.01M8.7 15.5h.01M12 15.5h.01M15.3 15.5h.01"/>',weather:'<path d="M7 18a4 4 0 01-.6-7.95A5.5 5.5 0 0117.4 9a3.6 3.6 0 01-.4 9z"/>',store:'<path d="M5.5 8h13l-1.2 12a1.5 1.5 0 01-1.5 1.3H8.2A1.5 1.5 0 016.7 20z"/><path d="M9 10V6.5a3 3 0 016 0V10"/>'};
+const apps=[['Pose Lab','hand'],['Routines','bolt'],['Browser','globe'],['Files','folder'],['Eva','wave'],['Settings','gear'],['Terminal','terminal'],['Music','music'],['Photos','photos'],['Mail','mail'],['Notes','notes'],['Calculator','calc'],['Weather','weather'],['App Store','store'],['Studio','spark'],['Accessibility','access'],['Focus','focus'],['Privacy','shield']];
+const icons={hand:'<path d="M8 12V6.5a1.5 1.5 0 013 0V11m0-5.5a1.5 1.5 0 013 0V11m0-4.5a1.5 1.5 0 013 0V12m0-3.5a1.5 1.5 0 013 0V15c0 3.2-2.5 5.5-5.6 5.5H11c-2 0-3.5-1.1-4.6-2.7L4 14.4A1.5 1.5 0 016.4 13L8 15"/>',bolt:'<path d="M13 2L4.5 13.5h6L9.5 22 18 10.5h-6z"/>',globe:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4a13 13 0 010 16M12 4a13 13 0 000 16"/>',folder:'<path d="M3.5 7h6l2-2h9v13h-17z"/>',wave:'<path d="M4 12c2 0 2-5 4-5s2 10 4 10 2-8 4-8 2 4 4 4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1m-8.6 8.6l-2.1 2.1"/>',spark:'<path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6z"/>',access:'<circle cx="12" cy="5" r="2"/><path d="M5 9h14M12 9v12m0-7l-5 6m5-6l5 6"/>',focus:'<path d="M8 4H4v4m12-4h4v4M8 20H4v-4m12 4h4v-4"/><circle cx="12" cy="12" r="3"/>',shield:'<path d="M12 3l7 3v5c0 4.8-2.9 8.1-7 10-4.1-1.9-7-5.2-7-10V6z"/><path d="M9 12l2 2 4-4"/>',terminal:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M6.5 9l3.5 3-3.5 3M12 15h5.5"/>',music:'<path d="M9 18V6l10-2v11"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="15" r="2.2"/>',photos:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4.5 17.5l4.5-4.5 3 3 3.5-3.5 4 4"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',notes:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8.5h6M9 12.5h6M9 16.5h4"/>',calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.7 12h.01M12 12h.01M15.3 12h.01M8.7 15.5h.01M12 15.5h.01M15.3 15.5h.01"/>',weather:'<path d="M7 18a4 4 0 01-.6-7.95A5.5 5.5 0 0117.4 9a3.6 3.6 0 01-.4 9z"/>',store:'<path d="M5.5 8h13l-1.2 12a1.5 1.5 0 01-1.5 1.3H8.2A1.5 1.5 0 016.7 20z"/><path d="M9 10V6.5a3 3 0 016 0V10"/>'};
 const appsEl=document.querySelector('#apps');function renderApps(q=''){appsEl.innerHTML=apps.filter(a=>a[0].toLowerCase().includes(q.toLowerCase())).map(a=>`<button class="app" data-app="${a[0]}"><span class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${icons[a[1]]}</svg></span><span>${a[0]}</span></button>`).join('')||'<p style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px">No matching apps</p>'}renderApps();
 const launcher=document.querySelector('#launcher'),voice=document.querySelector('#voice'),gesture=document.querySelector('#gesture'),toast=document.querySelector('#toast');let toastTimer;
 function closeAll(except){if(except!=='launcher')launcher.classList.remove('open');if(except!=='voice')voice.classList.remove('open');if(except!=='gesture')gesture.classList.remove('open')}
@@ -97,6 +140,7 @@ function armSilenceNudge(){clearTimeout(nativeWatch);heardAny=false;
   nativeWatch=setTimeout(()=>{if(engine==='native'&&!heardAny&&micStream)
     setDiag('No audio reaching the browser engine — tap above to use the private on-device engine.')},12000)}
 function setSpeaking(on,ms){
+  orbSet(on?'speak':(typeof micWanted!=='undefined'&&micWanted?'listen':'idle'));
   speaking=!!on;clearTimeout(speakGuard);
   /* hard ceiling: speechSynthesis does not reliably fire onend/onerror, and a
      stuck flag silently deafens both engines. Never trust it to clear itself. */
@@ -156,6 +200,9 @@ function runCommand(raw){
   const src=String(raw||'');
   /* echo guard: never obey Eva's own voice coming back through the mic */
   if(lastSay&&Date.now()-lastSayAt<2200&&norm(src).includes(norm(lastSay).slice(1,18)))return;
+  const macro=matchMacro(src);
+  if(macro){evaReply(macro.phrase+'.','Running routine: '+macro.steps.join(' · '),'Running '+macro.phrase);
+    macro.steps.forEach((s,i)=>setTimeout(()=>runCommand(s),900*(i+1)));return}
   /* chained commands: "open terminal and then next workspace" */
   const parts=norm(src).split(/\s(?:and then|then|and also|and)\s/).map(s=>s.trim()).filter(Boolean);
   if(parts.length>1){parts.forEach((p,i)=>setTimeout(()=>runOne(p,src),i*950));return}
@@ -203,6 +250,9 @@ function runOne(text,raw){
     evaReply('Ghost overlay '+(on?'on':'off')+'.','The camera AR layer is '+(on?'visible':'hidden')+'.',null);return}
   if(has(' center pointer ',' centre pointer ',' center cursor ',' reset pointer ',' middle of the screen ')){
     tx=innerWidth/2;ty=innerHeight/2;evaReply('Done.','Pointer centered.','Pointer centered');return}
+
+  if(has(' screenshot ',' snap the screen ',' capture the screen ',' take a picture of the screen ')){
+    takeScreenshot();evaReply('Screenshot.','Capturing the desktop as a PNG — check your downloads.','Screenshot taken');return}
 
   /* panels */
   if(has(' gesture')){if(!gesture.classList.contains('open'))toggleGesturePanel();
@@ -260,8 +310,8 @@ function startNative(){
       let interim='',final='';
       for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;
         if(e.results[i].isFinal)final+=t;else interim+=t}
-      if(final.trim()){lastHeardText=final.trim();heard('\u2713 '+final.trim(),true);runCommand(final)}
-      else if(interim.trim()){heard('\ud83c\udf99 '+interim.trim());vText.textContent='\u201c'+interim.trim()+'\u201d'}};
+      if(final.trim()){orbSet('think');lastHeardText=final.trim();heard('\u2713 '+final.trim(),true);runCommand(final)}
+      else if(interim.trim()){orbSet('listen');heard('\ud83c\udf99 '+interim.trim());vText.textContent='\u201c'+interim.trim()+'\u201d'}};
     rec.onerror=e=>{
       if(e.error==='no-speech'||e.error==='aborted')return;
       const msg=SR_ERR[e.error]||('error \u201c'+e.error+'\u201d');
@@ -554,7 +604,8 @@ function drawSkeleton(p){
 const BOX=0.15;                                        // active camera region -> full screen
 const mapAx=v=>Math.min(1,Math.max(0,(v-BOX)/(1-2*BOX)));
 function setGStatus(t,m){gStatus.textContent=t;gDot.className='gdot'+(m?' '+m:'')}
-function setPose(p){if(gPose)gPose.textContent=POSE_LABEL[p]||p}
+function poseName(p){return p.startsWith('custom:')?((loadPoses().find(x=>x.id===p.slice(7))||{}).name||'custom pose'):(POSE_LABEL[p]||p)}
+function setPose(p){if(gPose)gPose.textContent=poseName(p)}
 function gestureActive(){return tracking||gesture.classList.contains('open')}
 function toggleGesturePanel(){const open=!gesture.classList.contains('open');closeAll();gesture.classList.toggle('open',open);
   if(open){if(!tracking){tx=innerWidth*.72;ty=innerHeight*.55}setGStatus(tracking?'Tracking live — 21 landmarks locked':'Gesture mode on — enable the camera, or use arrow keys + Enter',tracking?'on':'')}
@@ -590,12 +641,15 @@ const GBIND={
   fist:{act:()=>{closeAll();showToast('Fist — panels dismissed')},say:'Fist — close'},
   point_up:{act:()=>nudgeVolume(1),say:'Volume up'},
   point_down:{act:()=>nudgeVolume(-1),say:'Volume down'},
-  victory:{act:openVoicePanel,say:'Victory — Eva'},
+  victory:{act:()=>{takeScreenshot()},say:'Victory — screenshot'},
   horns:{act:()=>{if(!gesture.classList.contains('open'))toggleGesturePanel()},say:'Horns — gesture panel'},
   swipe_left:{act:()=>switchWorkspace(1),say:'Swipe left'},
   swipe_right:{act:()=>switchWorkspace(-1),say:'Swipe right'}
 };
-function fireGesture(g){const b=GBIND[g];if(!b)return;b.act();setPose(g)}
+function fireGesture(g){
+  if(g.startsWith('custom:')){const def=loadPoses().find(x=>x.id===g.slice(7));
+    if(def&&CUST_ACT[def.action]){CUST_ACT[def.action].act()}setPose(g);return}
+  const b=GBIND[g];if(!b)return;b.act();setPose(g)}
 
 /* ---------------- results pipeline ---------------- */
 function onHand(res){
@@ -610,7 +664,9 @@ function onHand(res){
   }
   const p=smoothHand(raw),now=performance.now();
   drawSkeleton(p);
+  for(let i=0;i<frameHooks.length;i++)frameHooks[i](p);
   pose=classifyHand(p,pinchDown);
+  if(pose==='none'&&posesEnabled()){const cid=matchCustomPose(p);if(cid)pose='custom:'+cid}
 
   /* pinch: entering the pose arms it, releasing clicks — same as a real button */
   const isPinch=pose==='pinch'||pose==='ok_sign';
@@ -622,7 +678,7 @@ function onHand(res){
   if(!paused){tx=mapAx(p[8][0])*innerWidth;ty=(1-mapAx(p[8][1]))*innerHeight}
 
   /* floating pose label rides with the pointer */
-  gtag.textContent=POSE_LABEL[pose]||pose;gtag.classList.add('on');setPose(pose);
+  gtag.textContent=poseName(pose);gtag.classList.add('on');setPose(pose);
 
   /* open palm held = freeze (so you can rest your hand mid-air) */
   if(pose==='open_palm'&&!pinchDown){
@@ -641,8 +697,8 @@ function onHand(res){
   /* stability gate + cooldown so a pose has to be meant, not passed through */
   if(fired===lastPose)stable++;else{lastPose=fired;stable=0}
   const isSwipe=fired==='swipe_left'||fired==='swipe_right';
-  if(GBIND[fired]&&(isSwipe||stable>=2)&&now-lastFire>820){
-    lastFire=now;gtag.textContent=(POSE_LABEL[fired]||fired)+' ✓';fireGesture(fired);
+  if((GBIND[fired]||fired.startsWith('custom:'))&&(isSwipe||stable>=2)&&now-lastFire>820){
+    lastFire=now;gtag.textContent=poseName(fired)+' ✓';fireGesture(fired);
   }
   if(!paused)setGStatus(pinchDown?'Pinch held — release to click':'Tracking live — 21 landmarks locked','on');
 }
@@ -930,7 +986,7 @@ APPDEF.Terminal={w:520,h:320,render(b){
     out.appendChild(d);out.scrollTop=1e9};
   say('Tosse OS shell (preview) — type `help`','dim');
   const CMDS={
-    help:()=>say('help  ls  pwd  whoami  uname  date  eva  volume  gestures  clear'),
+    help:()=>say('help  ls  pwd  whoami  uname  date  eva  volume  gestures  screenshot  poses  clear'),
     ls:()=>say('Documents  Pictures  Music  masterplan.md  tosse-notes.txt'),
     pwd:()=>say('/home/tosse'),
     whoami:()=>say('tosse'),
@@ -939,6 +995,9 @@ APPDEF.Terminal={w:520,h:320,render(b){
     eva:()=>{say('waking the assistant…','dim');openAppWindow('Eva')},
     volume:()=>say('volume: '+volume+'%'),
     gestures:()=>say('tracking: '+(tracking?'live · 21 landmarks':'off')),
+    screenshot:()=>{say('capturing the desktop…','dim');takeScreenshot()},
+    poses:()=>{openAppWindow('Pose Lab');say('opening the pose lab — teach eva a new sign','dim')},
+    routines:()=>{openAppWindow('Routines');say('opening routines — one phrase, many actions','dim')},
     clear:()=>{out.innerHTML=''}
   };
   inp.addEventListener('keydown',e=>{
@@ -1189,6 +1248,178 @@ document.querySelector('#bootSkip').addEventListener('click',()=>{try{localStora
   requestAnimationFrame(()=>setTimeout(askSensors,260));      // let the card paint first
 })();
 function updateClock(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}updateClock();setInterval(updateClock,30000);
+
+/* ══════════════════════════════════════════════════════════════
+   EVA ORB · CUSTOM POSE LAB · VOICE ROUTINES · REAL SCREENSHOTS
+   ══════════════════════════════════════════════════════════════ */
+let orbState='idle';
+function orbSet(s){orbState=s;const o=document.getElementById('evaOrb');if(o&&o.dataset.state!==s)o.dataset.state=s}
+(function mountOrb(){
+  const o=document.createElement('button');
+  o.id='evaOrb';o.dataset.state='idle';o.setAttribute('aria-label','Talk to Eva');
+  o.innerHTML='<span class="orb-ring"></span><span class="orb-core"></span><span class="orb-bars"><i></i><i></i><i></i></span>';
+  o.addEventListener('click',()=>openVoicePanel());
+  document.body.appendChild(o);
+})();
+
+/* ── real screenshots (victory gesture / voice / terminal) ── */
+async function takeScreenshot(){
+  if(typeof html2canvas==='undefined'){showToast('Screenshot engine still loading — try again in a second');return 0}
+  try{
+    const c=await html2canvas(document.body,{backgroundColor:'#07080d',scale:1,logging:false,
+      ignoreElements:el=>el.id==='skel'||el.id==='camghost'||el.id==='evaOrb'||el.tagName==='VIDEO'});
+    const url=c.toDataURL('image/png');
+    const a=document.createElement('a');a.href=url;
+    a.download='tosse-os-'+new Date().toISOString().replace(/[:.]/g,'-')+'.png';
+    document.body.appendChild(a);a.click();a.remove();
+    showToast('✌ Screenshot saved — check your downloads');
+    return url.length;
+  }catch(e){showToast('Screenshot failed — '+e.message);return 0}
+}
+
+/* ── custom pose engine ────────────────────────────────────── */
+const frameHooks=[];
+function loadPoses(){try{return JSON.parse(localStorage.getItem('tosseos.poses')||'[]')}catch(_){return[]}}
+function savePoses(l){try{localStorage.setItem('tosseos.poses',JSON.stringify(l))}catch(_){}}
+function posesEnabled(){try{return localStorage.getItem('tosseos.posesOn')!=='0'}catch(_){return true}}
+function featVec(p){
+  const wrist=p[0],size=Math.max(d3(wrist,p[9]),1e-6),v=[];
+  for(let i=0;i<21;i++){v.push((p[i][0]-wrist[0])/size,(p[i][1]-wrist[1])/size,(p[i][2]-wrist[2])/size)}
+  v.push(d3(p[4],p[8])/size);
+  for(const f of Object.values(FING))v.push(d3(p[f[3]],wrist)/Math.max(d3(p[f[1]],wrist),1e-6));
+  v.push(d3(p[4],p[5])/Math.max(d3(p[3],p[5]),1e-6));
+  return v;
+}
+function poseDist(a,b){let s=0;for(let i=0;i<a.length;i++){const d=a[i]-b[i];s+=d*d}return Math.sqrt(s/a.length)}
+function matchCustomPose(p){
+  const v=featVec(p);let best=null,bd=1e9;
+  for(const pose of loadPoses())for(const s of pose.samples){const d=poseDist(v,s);if(d<bd){bd=d;best=pose.id}}
+  return bd<0.30?best:null;
+}
+const CUST_ACT={
+  screenshot:{label:'Save screenshot',act:()=>takeScreenshot()},
+  eva:{label:'Wake Eva',act:()=>openVoicePanel()},
+  launcher:{label:'Open the launcher',act:()=>openLauncher()},
+  close:{label:'Close every panel',act:()=>{closeAll();showToast('Panels dismissed')}},
+  volup:{label:'Volume up',act:()=>nudgeVolume(1)},
+  voldown:{label:'Volume down',act:()=>nudgeVolume(-1)},
+  mute:{label:'Mute',act:()=>{volume=0;osd('Muted',0)}},
+  wsnext:{label:'Next workspace',act:()=>switchWorkspace(1)},
+  wsprev:{label:'Previous workspace',act:()=>switchWorkspace(-1)},
+  center:{label:'Center the pointer',act:()=>{tx=innerWidth/2;ty=innerHeight/2}},
+  ghost:{label:'Toggle ghost overlay',act:()=>setGhost(!ghostOn)},
+  gestures:{label:'Open gesture panel',act:()=>{if(!gesture.classList.contains('open'))toggleGesturePanel()}},
+};
+
+APPDEF['Pose Lab']={w:430,h:540,render(b){
+  b.innerHTML='<div class="plstat '+(tracking?'':'off')+'" id="plStat">'
+    +(tracking?'Camera live — hold each pose steady':'Camera is off — enable it in the Gesture panel first')+'</div>'
+    +'<div class="plfield"><label>Pose name</label><input id="plName" maxlength="24" placeholder="e.g. call me" /></div>'
+    +'<div class="plfield"><label>Fires this action</label><select id="plAct">'
+    +Object.entries(CUST_ACT).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('')+'</select></div>'
+    +'<button class="wbtn" id="plCap" style="width:100%">● Capture sample (<span id="plN">0</span>/3)</button>'
+    +'<div class="plsamples" id="plDots"><i></i><i></i><i></i></div>'
+    +'<button class="wbtn" id="plSave" disabled style="width:100%;background:rgba(124,156,255,.25)">Save pose</button>'
+    +'<ul class="plposes" id="plList"></ul>'
+    +'<p class="wnote">Custom poses match only when no built-in pose fits, so the core eleven always win. '
+    +'Keep your hand upright — matching is rotation-sensitive. Everything stays in localStorage, on this device.</p>';
+  const $=s=>b.querySelector(s);
+  let samples=[];
+  const dots=$('#plDots').children;
+  const redraw=()=>{
+    const list=loadPoses();
+    $('#plList').innerHTML=list.map(pz=>'<li><b>'+pz.name.replace(/</g,'&lt;')+'</b><small>'
+      +(CUST_ACT[pz.action]||{}).label+'</small><button class="pldel" data-id="'+pz.id+'">delete</button></li>').join('')
+      ||'<li><small>No custom poses yet — teach Eva your first one.</small></li>';
+  };
+  redraw();
+  $('#plList').addEventListener('click',e=>{const d=e.target.closest('.pldel');if(!d)return;
+    savePoses(loadPoses().filter(x=>x.id!==d.dataset.id));redraw();showToast('Pose deleted')});
+  $('#plCap').addEventListener('click',()=>{
+    if(!tracking){$('#plStat').className='plstat off';$('#plStat').textContent='Camera is off — enable it in the Gesture panel first';return}
+    const cap=$('#plCap');cap.disabled=true;
+    $('#plStat').textContent='Hold the pose steady…';
+    const frames=[];
+    const hook=pp=>frames.push(featVec(pp));
+    frameHooks.push(hook);
+    setTimeout(()=>{
+      frameHooks.splice(frameHooks.indexOf(hook),1);
+      cap.disabled=false;
+      $('#plStat').textContent=tracking?'Camera live — hold each pose steady':'Camera is off — enable it in the Gesture panel first';
+      if(!frames.length){$('#plStat').textContent='No hand seen — show one hand and try again';return}
+      const mean=frames[0].map((_,i)=>frames.reduce((a,f)=>a+f[i],0)/frames.length);
+      samples.push(mean);
+      dots[samples.length-1].className='done';
+      $('#plN').textContent=String(samples.length);
+      cap.innerHTML='● Capture sample (<span id="plN">'+samples.length+'</span>/3)';
+      if(samples.length>=3){$('#plSave').disabled=false}
+    },700);
+  });
+  $('#plSave').addEventListener('click',()=>{
+    const name=$('#plName').value.trim();
+    if(!name){$('#plName').focus();return}
+    if(samples.length<3)return;
+    const list=loadPoses();
+    list.push({id:'c'+Date.now().toString(36),name,action:$('#plAct').value,samples:samples.slice()});
+    savePoses(list);
+    samples=[];[].forEach.call(dots,d=>d.className='');
+    $('#plSave').disabled=true;$('#plName').value='';
+    $('#plCap').innerHTML='● Capture sample (<span id="plN">0</span>/3)';
+    redraw();showToast('Pose "'+name+'" learned — make the sign to fire it');
+  });
+}};
+
+/* ── voice routines ────────────────────────────────────────── */
+function loadMacros(){try{return JSON.parse(localStorage.getItem('tosseos.routines')||'[]')}catch(_){return[]}}
+function saveMacros(l){try{localStorage.setItem('tosseos.routines',JSON.stringify(l))}catch(_){}}
+function matchMacro(src){
+  const n=' '+norm(src).trim()+' ';
+  return loadMacros().find(m=>m.phrase&&n.includes(' '+norm(m.phrase).trim()+' '))||null;
+}
+const ROUTINE_STEPS=[['mute','Mute'],['volume up','Volume up'],['volume down','Volume down'],
+  ['next workspace','Next workspace'],['previous workspace','Previous workspace'],
+  ['open terminal','Open Terminal'],['open music','Open Music'],['open files','Open Files'],
+  ['open notes','Open Notes'],['camera on','Camera on'],['camera off','Camera off'],
+  ['center pointer','Center pointer']];
+APPDEF['Routines']={w:430,h:480,render(b){
+  b.innerHTML='<div class="plfield"><label>When I say…</label><input id="rtPhrase" maxlength="32" placeholder="e.g. cinema mode" /></div>'
+    +'<div class="plfield"><label>Do these, in order</label><div class="rtsteps">'
+    +ROUTINE_STEPS.map(([c,l])=>'<label><input type="checkbox" value="'+c+'" />'+l+'</label>').join('')+'</div></div>'
+    +'<button class="wbtn" id="rtSave" style="width:100%;background:rgba(124,156,255,.25)">Save routine</button>'
+    +'<ul class="plposes" id="rtList"></ul>'
+    +'<p class="wnote">Routines run through the normal command engine, one step per beat — anything Eva understands works as a step.</p>';
+  const $=s=>b.querySelector(s);
+  const redraw=()=>{
+    const list=loadMacros();
+    $('#rtList').innerHTML=list.map(m=>'<li><b>“'+m.phrase.replace(/</g,'&lt;')+'”</b><small>'+m.steps.length+' steps</small>'
+      +'<button class="pldel" style="color:#b8c7ff;background:rgba(124,156,255,.14)" data-run="'+m.id+'">run</button>'
+      +'<button class="pldel" data-id="'+m.id+'">delete</button></li>').join('')
+      ||'<li><small>No routines yet — try “cinema mode” with mute + volume down + open music.</small></li>';
+  };
+  redraw();
+  $('#rtList').addEventListener('click',e=>{
+    const run=e.target.closest('[data-run]');
+    if(run){const m=loadMacros().find(x=>x.id===run.dataset.run);if(m)runCommand(m.phrase);return}
+    const d=e.target.closest('.pldel');if(!d)return;
+    saveMacros(loadMacros().filter(x=>x.id!==d.dataset.id));redraw();showToast('Routine deleted');
+  });
+  $('#rtSave').addEventListener('click',()=>{
+    const phrase=$('#rtPhrase').value.trim().toLowerCase();
+    const steps=[...b.querySelectorAll('.rtsteps input:checked')].map(i=>i.value);
+    if(!phrase){$('#rtPhrase').focus();return}
+    if(!steps.length){showToast('Pick at least one step');return}
+    const list=loadMacros().filter(m=>m.phrase!==phrase);
+    list.push({id:'r'+Date.now().toString(36),phrase,steps});
+    saveMacros(list);$('#rtPhrase').value='';b.querySelectorAll('.rtsteps input:checked').forEach(i=>i.checked=false);
+    redraw();showToast('Routine saved — say “'+phrase+'”');
+  });
+}};
+
+/* ── offline PWA shell ─────────────────────────────────────── */
+if('serviceWorker' in navigator){
+  addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
+}
+
 </script>
 </body>
 </html>
