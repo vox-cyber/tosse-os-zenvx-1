@@ -428,7 +428,7 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
 </nav></div>
 <section id="launcher" class="panel" aria-label="Application launcher"><label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr">Search apps</span><input id="appSearch" placeholder="Search apps, settings or ask Eva…" /></label><div class="apps" id="apps"></div></section>
 <section id="voice" class="voice" aria-label="Eva voice assistant"><button class="close" data-close="voice" aria-label="Close">×</button><div class="voicebox"><div class="rings"><button id="voiceMic" class="mic" aria-label="Enable microphone"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="3" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.9"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button></div><h2 id="voiceTitle">I’m listening.</h2><p id="voiceText">Tap the mic and speak — say &ldquo;help&rdquo; for commands.</p><div id="micState" class="micstate"><span class="dot"></span><span>Microphone off</span></div><button id="engineBtn" class="enginestate" type="button" title="Tap to switch voice engine">Voice engine: off</button><p id="voiceDiag" class="vdiag"></p><div class="vtoggles"><button id="speakToggle" type="button">Eva speaks back: on</button><button id="vdToggle" type="button">Voice diagnostics</button></div><div id="vdPanel" class="vdpanel"><div class="vdrow"><span>Engine</span><b id="vdEngine">off</b></div><div class="vdrow"><span>Microphone</span><b id="vdMic">off</b></div><div class="vdrow"><span>Input level</span><span class="vdmeter"><i id="vdLevel"></i></span><b id="vdLevelN">0.0000</b></div><div class="vdrow"><span>Audio frames</span><b id="vdFrames">0</b></div><div class="vdrow"><span>Speech gate</span><b id="vdGate">idle</b></div><div class="vdrow"><span>Last heard</span><b id="vdLast">—</b></div><div class="vdrow"><span>Last error</span><b id="vdErr">none</b></div><button class="wbtn" id="vdCopy" type="button">Copy diagnostics</button><p class="wnote">If the level bar stays flat while you talk, the microphone is not reaching the page. If it moves but nothing happens, send me this readout.</p></div><label class="vcmd"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="voiceCmd" placeholder='Or type a command — try "open terminal"' autocomplete="off" /></label><button id="wakeToggle" type="button">Wake word: off</button><div class="chips"><button class="chip">Open accessibility</button><button class="chip">Start focus mode</button><button class="chip">Show my files</button><button class="chip">What can I say?</button></div></div></section>
-<aside id="gesture" class="gesture" aria-label="Gesture control panel"><div class="gesturehead"><h3>Gesture Control</h3><span class="badge">ON-DEVICE · PRIVATE</span></div><div class="camview" id="camview"><video id="gestureCam" autoplay playsinline muted></video><canvas id="skel"></canvas><div class="camoff">Camera off.<br>Enable hand tracking, or drive the pointer with your keyboard.</div></div><div class="gstatus"><span class="gdot" id="gDot"></span><span id="gStatus">Gesture mode ready</span></div><div class="gactions"><button id="camToggle" class="gbtn primary">Enable camera</button><button id="ptrCenter" class="gbtn">Center pointer</button><button id="ghostToggle" class="gbtn wide">Ghost overlay: on</button></div><div class="poserow"><span>Detected pose</span><b id="gPose">none</b></div><ul class="guide"><li><span><i>☝</i> <b>Point</b> — index fingertip drives the pointer</span></li><li><span><i>🤏</i> <b>Pinch</b> — thumb + index, release to click</span></li><li><span><i>👌</i> <b>OK sign</b> — opens the app launcher</span></li><li><span><i>✊</i> <b>Fist</b> — closes every panel</span></li><li><span><i>✋</i> <b>Open palm</b> — hold to freeze the pointer</span></li><li><span><i>👆👇</i> <b>Point up / down</b> — volume</span></li><li><span><i>✌</i> <b>Victory</b> — saves a screenshot (PNG)</span></li><li><span><i>🤘</i> <b>Horns</b> — opens this panel</span></li><li><span><i>👈👉</i> <b>Swipe</b> — switches workspace</span></li><li><span><i>⌨</i> <b>Arrow keys + Enter</b> — move & click — no camera needed</span></li></ul></aside>
+<aside id="gesture" class="gesture" aria-label="Gesture control panel"><div class="gesturehead"><h3>Gesture Control</h3><span class="badge">ON-DEVICE · PRIVATE</span></div><div class="camview" id="camview"><video id="gestureCam" autoplay playsinline muted></video><canvas id="skel"></canvas><div class="camoff">Camera off.<br>Enable hand tracking, or drive the pointer with your keyboard.</div></div><div class="gstatus"><span class="gdot" id="gDot"></span><span id="gStatus">Gesture mode ready</span></div><div class="gactions"><button id="camToggle" class="gbtn primary">Enable camera</button><button id="ptrCenter" class="gbtn">Center pointer</button><button id="ghostToggle" class="gbtn wide">Ghost overlay: on</button></div><div class="poserow"><span>Detected pose</span><b id="gPose">none</b></div><ul class="guide"><li><span><i>☝</i> <b>Point</b> — index fingertip drives the pointer</span></li><li><span><i>🤏</i> <b>Pinch</b> — thumb + index, release to click</span></li><li><span><i>👌</i> <b>OK sign</b> — opens the app launcher</span></li><li><span><i>✊</i> <b>Fist</b> — closes every panel</span></li><li><span><i>✋</i> <b>Open palm</b> — hold to freeze the pointer</span></li><li><span><i>👆👇</i> <b>Point up / down</b> — volume</span></li><li><span><i>✌</i> <b>Victory</b> — saves a screenshot (PNG)</span></li><li><span><i>🤘</i> <b>Horns</b> — opens this panel</span></li><li><span><i>🤚</i> <b>Three fingers</b> — drag up or down to scroll</span></li><li><span><i>👈👉</i> <b>Swipe</b> — switches workspace</span></li><li><span><i>⌨</i> <b>Arrow keys + Enter</b> — move & click — no camera needed</span></li></ul></aside>
 <div id="camghost" aria-hidden="true"><video id="ghostCam" autoplay playsinline muted></video></div><div id="windows" class="windows"></div><div id="pointer" class="pointer" aria-hidden="true"></div><div id="gtag" aria-hidden="true"></div><div id="heard" role="status" aria-live="polite"></div><div id="osd" aria-hidden="true"><div class="osdlabel"></div><div class="osdbar"><span class="osdfill"></span></div></div>
 <div id="toast" class="toast" role="status"><strong>Tosse OS Preview</strong><p id="toastText"></p></div>
 <script>
@@ -889,7 +889,7 @@ const pointer=document.querySelector('#pointer'),camview=document.querySelector(
   osdEl=document.querySelector('#osd');
 let hands=null,mpCam=null,tracking=false,pinchDown=false,paused=false,ghostOn=true;
 let smooth=null,pose='none',lastPose='',stable=0,lastFire=0,trail=[],palmSince=null,hoverEl=null,frames=0;
-let px=innerWidth/2,py=innerHeight/2,tx=px,ty=py;
+let px=innerWidth/2,py=innerHeight/2,tx=px,ty=py,scrollRef=null;
 let volume=62;
 const wsNames=['Workspace 1','Workspace 2','Workspace 3'],wsDesc=['Flow','Focus','Play'];let wsIndex=0;
 document.body.dataset.ws='0';
@@ -914,13 +914,14 @@ function classifyHand(p,pinchHeld){
     if(Math.abs(dy)>=Math.abs(dx))return dy>0?'point_up':'point_down';
     return dx>0?'point_right':'point_left';
   }
+  if(fingers.length===3&&fingers.includes('index')&&fingers.includes('middle')&&fingers.includes('ring'))return 'three';
   if(fingers.length===2&&fingers.includes('index')&&fingers.includes('middle'))return 'victory';
   if(fingers.length===2&&fingers.includes('index')&&fingers.includes('pinky'))return 'horns';
   return 'none';
 }
 const POSE_LABEL={pinch:'pinch',ok_sign:'OK sign',fist:'fist',open_palm:'open palm',cursor:'L-pose',
   point_up:'point up',point_down:'point down',point_left:'point left',point_right:'point right',
-  victory:'victory',horns:'horns',swipe_left:'swipe left',swipe_right:'swipe right',none:'hand'};
+  victory:'victory',horns:'horns',three:'three fingers',swipe_left:'swipe left',swipe_right:'swipe right',none:'hand'};
 
 /* ---------------- adaptive per-landmark smoothing ---------------- */
 /* mirror + y-up, then chase fast movement and damp micro-jitter. This is
@@ -1041,15 +1042,27 @@ function onHand(res){
   /* floating pose label rides with the pointer */
   gtag.textContent=poseName(pose);gtag.classList.add('on');setPose(pose);
 
+  /* three fingers: grab the page — the content follows your hand, like a trackpad */
+  if(pose==='three'&&!paused){
+    if(scrollRef===null)scrollRef=p[9][1];
+    const sdy=p[9][1]-scrollRef;scrollRef=p[9][1];
+    const hit=document.elementFromPoint(px,py);
+    const sc=(hit&&hit.closest)?hit.closest('.wbody'):null;
+    (sc||document.querySelector('.stage')).scrollTop-=sdy*innerHeight*2.1;  /* content follows the hand */
+    tx=px;ty=py;                                  /* the pointer stays; the page moves */
+    gtag.textContent='scrolling';
+  }else scrollRef=null;
+
   /* open palm held = freeze (so you can rest your hand mid-air) */
   if(pose==='open_palm'&&!pinchDown){
     if(!palmSince)palmSince=now;
     if(now-palmSince>420){if(!paused){paused=true;pointer.classList.add('paused')}setGStatus('Paused — open palm held. Relax your hand to resume.','')}
   }else{palmSince=null;if(paused){paused=false;pointer.classList.remove('paused')}}
 
-  /* swipe from mirrored wrist travel inside a 280ms window */
+  /* swipe from mirrored wrist travel inside a 280ms window (never mid-scroll) */
   let fired=pose;
-  trail.push([now,p[0][0]]);trail=trail.filter(([t])=>now-t<280);
+  if(pose!=='three'){trail.push([now,p[0][0]]);trail=trail.filter(([t])=>now-t<280)}
+  else trail=[];
   if(trail.length>2){
     const travel=trail[trail.length-1][1]-trail[0][1];
     if(Math.abs(travel)>0.22){fired=travel>0?'swipe_right':'swipe_left';trail=[]}
