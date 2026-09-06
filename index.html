@@ -243,6 +243,27 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
 .w-perfrow{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
 .w-perfrow b{font-size:15px;color:#e8ecf6;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:0;text-transform:none}
 
+/* focus timer + workspaces */
+.tile-focus{grid-area:6/1/6/3;display:flex;flex-direction:column}
+.w-focusrow{display:flex;align-items:baseline;gap:14px}
+.w-focustime{font-size:clamp(30px,3vw,42px);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.w-focusstate{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.w-focusbar{margin-top:12px;height:4px;border-radius:4px;background:rgba(255,255,255,.09);overflow:hidden}
+.w-focusbar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#8fb0ff,#68d6a2);transition:width .9s linear}
+.w-focusbtns{display:flex;gap:8px;margin-top:12px}
+.tile-ws{grid-area:6/3/6/5;display:flex;flex-direction:column}
+.w-wscur{font-size:clamp(19px,1.9vw,26px);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.w-wscur small{display:block;font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.04em;margin-top:3px}
+.w-wsbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.w-wsbtns button{border:1px solid var(--line);background:rgba(255,255,255,.045);color:#e8ecf6;font-size:11.5px;font-weight:600;padding:9px 6px;border-radius:11px;cursor:pointer;transition:background .2s,border-color .2s,transform .18s cubic-bezier(.16,1,.3,1)}
+.w-wsbtns button:hover{background:rgba(143,176,255,.14)}
+.w-wsbtns button.on{background:rgba(143,176,255,.25);border-color:rgba(143,176,255,.5)}
+.w-wsbtns button:active{transform:scale(.94)}
+
+/* touch-first hint swap */
+.shortcut .sc-touch{display:none}
+@media (pointer:coarse){.shortcut .sc-desk{display:none}.shortcut .sc-touch{display:inline}}
+
 /* bento responsive */
 @media (max-width:1180px){
   .bento{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(140px,auto)}
@@ -253,10 +274,11 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
   .tile-check{grid-area:auto/1/auto/3}
   .tile-gest{grid-area:auto/1/auto/3}
   .tile-routines,.tile-perf{grid-area:auto}
+  .tile-focus,.tile-ws{grid-area:auto/1/auto/3}
 }
 @media (max-width:640px){
   .bento{grid-template-columns:minmax(0,1fr)}
-  .tile-welcome,.tile-sys,.tile-actions,.tile-check,.tile-gest{grid-area:auto/1/auto/2}
+  .tile-welcome,.tile-sys,.tile-actions,.tile-check,.tile-gest,.tile-focus,.tile-ws{grid-area:auto/1/auto/2}
   .stage{padding:12px 12px 108px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -375,9 +397,29 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
         <div class="w-perfrow"><span>Windows open</span><b id="wPerfWin">0</b></div>
       </div>
     </article>
+
+    <article class="tile tile-focus" data-tile aria-label="Focus timer">
+      <div class="tlabel">Focus · pomodoro</div>
+      <div class="w-focusrow"><span class="w-focustime" id="wFoTime">25:00</span><span class="w-focusstate" id="wFoState">ready</span></div>
+      <div class="w-focusbar"><span id="wFoFill"></span></div>
+      <div class="w-focusbtns">
+        <button class="tmini" id="wFoToggle" type="button">Start 25 min</button>
+        <button class="tmini" id="wFoReset" type="button">Reset</button>
+      </div>
+    </article>
+
+    <article class="tile tile-ws" data-tile aria-label="Workspaces">
+      <div class="tlabel">Workspaces</div>
+      <div class="w-wscur"><span id="wWsName">Workspace 1</span><small id="wWsDesc">Flow</small></div>
+      <div class="w-wsbtns" id="wWsBtns">
+        <button type="button" data-ws="0" class="on">1 · Flow</button>
+        <button type="button" data-ws="1">2 · Focus</button>
+        <button type="button" data-ws="2">3 · Play</button>
+      </div>
+    </article>
   </div>
 </section></main>
-<div class="shortcut">Press <span class="kbd">Space</span> for Eva · <span class="kbd">G</span> for gestures · <span class="kbd">←→↑↓</span> + <span class="kbd">Enter</span> to point & click</div>
+<div class="shortcut"><span class="sc-desk">Press <span class="kbd">Space</span> for Eva · <span class="kbd">G</span> for gestures · <span class="kbd">←→↑↓</span> + <span class="kbd">Enter</span> to point & click</span><span class="sc-touch">Everything works by touch — tap the mic for Eva, or open Gestures for hand control</span></div>
 <div class="dockwrap"><nav class="dock" aria-label="App dock">
 <button aria-label="App launcher" data-action="launcher"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="6" height="6" rx="1.5" fill="currentColor" opacity=".65"/><rect x="4" y="14" width="6" height="6" rx="1.5" fill="currentColor" opacity=".65"/><rect x="14" y="14" width="6" height="6" rx="1.5" fill="currentColor"/></svg></button>
 <button class="active" aria-label="Eva assistant" data-action="voice"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12c2.1 0 2.1-5 4.2-5s2.1 10 4.2 10 2.1-7 4.2-7c.8 0 1.4.8 1.9 1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -504,7 +546,7 @@ function runOne(text,raw){
 
   if(has(' help ',' what can i say ',' what can you do ',' commands ',' command list ')){
     evaReply('Voice commands',
-      'Apps: “open terminal” · Camera: “enable camera” · Pointer: “center pointer” · Workspaces: “next workspace”, “workspace two” · Sound: “volume up”, “mute” · Panels: “open launcher”, “open gestures”, “close” · Mic: “wake word on”, “stop listening”.',
+      'Apps: “open terminal” · Everyday: “what time is it”, “battery”, “take a note…”, “focus mode”, “what’s the weather” · Camera: “enable camera” · Pointer: “center pointer” · Workspaces: “next workspace”, “workspace two” · Sound: “volume up”, “mute” · Panels: “open launcher”, “open gestures”, “close” · Mic: “wake word on”, “stop listening”.',
       'You can open any app, enable the camera, switch workspaces, change the volume, or say close, wake word on, or stop listening.');return}
   if(has(' stop listening ',' goodbye ',' bye bye ',' turn off the mic ',' turn off mic ',' mic off ',' microphone off ')){
     evaReply('Goodbye.','Voice control off — press Space whenever you need me.','Bye');setTimeout(stopMic,700);return}
@@ -550,6 +592,36 @@ function runOne(text,raw){
     evaReply('Launcher open.','Say an app name, or pinch one with your hand.','Launcher open');return}
   if(has(' close ',' go back ',' dismiss ',' escape ',' never mind ')){closeAll();
     evaReply('Closed.','All panels dismissed.','Closed');return}
+
+  /* everyday answers */
+  const noteM=c.match(/ (?:take a note|note that|jot this down|write this down)(?: (.*))? /);
+  if(noteM){const txt=(noteM[1]||'').trim();
+    if(txt){const elN=document.querySelector('#wNote');
+      if(elN){elN.value=(elN.value?elN.value.replace(/\s*$/,'')+'\n':'')+txt;
+        try{localStorage.setItem('tosse.sticky',elN.value)}catch(_){}}
+      evaReply('Noted.','Added to the sticky on your home screen — it never leaves this machine.','Noted')}
+    else evaReply('Note what?','Say “take a note” plus the thought — it lands on the home sticky.','Note what?');return}
+  if(has(' what time ',' time is it ',' current time ',' what day is it ',' todays date '," today's date ",' what is the date ')){
+    const d=new Date(),t=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+      dd=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    evaReply('It’s '+t+'.',dd+'.','It’s '+t);return}
+  if(has(' battery ',' charge level ',' power left ')){
+    if(navigator.getBattery){navigator.getBattery().then(bt=>{const pc=Math.round(bt.level*100);
+      evaReply('Battery '+pc+'%.',(bt.charging?'Charging right now.':'Running on battery.')+' Every sensor stays on-device.',
+        'Battery '+pc+' percent')}).catch(()=>evaReply('Battery.','This browser does not expose battery status.',null))}
+    else evaReply('Battery.','This browser does not expose battery status — on the ISO build it lives in the top bar.',null);
+    return}
+  if(has(' what is the weather '," what's the weather ",' whats the weather ',' weather today ',' the forecast ',' temperature outside ',' how hot is it ',' how cold is it ')){
+    const wt=document.querySelector('#wWxTemp'),wc=document.querySelector('#wWxCond'),wy=document.querySelector('#wWxCity');
+    if(wt&&wc){evaReply('Weather.','In '+(wy?wy.textContent:'your city')+' it’s '+wt.textContent+' — '+wc.textContent+'. (Simulated in this preview; the ISO reads real sensors.)','Right now it’s '+wt.textContent);return}}
+  if(has(' who made you ',' who built you ',' who created you ',' who are you ',' about eva ')){
+    evaReply('I’m Eva.','The on-device assistant inside Tosse OS — built by ZenvX AI Studio, five people who think machines should listen first. Everything I do happens on this machine.','I’m Eva — built by ZenvX AI Studio');return}
+  if(has(' focus mode ',' focus timer ',' pomodoro ',' start focus ',' start focusing ',' focus on ',' begin focus ')){
+    if(window.focusToggle)window.focusToggle(true);
+    evaReply('Focus on.','Twenty-five minutes on the home tile — say “stop focus” when you’re done.','Focus timer started');return}
+  if(has(' stop focus ',' end focus ',' focus off ',' break time ')){
+    if(window.focusToggle)window.focusToggle(false);
+    evaReply('Focus off.','Break earned — the tile is reset.','Focus stopped');return}
 
   /* apps — verb optional: "terminal" works as well as "open terminal" */
   const app=matchApp(c);
@@ -906,7 +978,7 @@ function hoverCheck(){const t=pickAt(px,py);if(t!==hoverEl){if(hoverEl)hoverEl.c
 function renderPointer(){
   const dx=tx-px,dy=ty-py,dist=Math.hypot(dx,dy);
   const a=dist>150?.42:dist>45?.3:.17;                 // snappy across the screen, steady on a target
-  px+=dx*a;py+=dy*a;
+  if(dist>=1.2){px+=dx*a;py+=dy*a}                       // deadzone: held-target jitter never moves the pointer
   px=Math.max(6,Math.min(innerWidth-6,px));py=Math.max(6,Math.min(innerHeight-6,py));
   pointer.style.transform=`translate(${px}px,${py}px) scale(${pinchDown?.7:1})`;
   if(gtag.classList.contains('on')){gtag.style.left=px+'px';gtag.style.top=py+'px'}
@@ -1957,6 +2029,49 @@ if(rtList){
     showToast('Running routine: '+m.phrase);
     m.steps.forEach((st2,i)=>setTimeout(()=>runCommand(st2),900*(i+1)));
   });
+}
+
+/* ── focus tile: a real pomodoro that survives reloads ── */
+const foTime=$w('#wFoTime'),foState=$w('#wFoState'),foFill=$w('#wFoFill'),foTog=$w('#wFoToggle');
+if(foTime){
+  const LEN=25*60;
+  let endAt=0;
+  try{endAt=+localStorage.getItem('tosse.focusEnd')||0}catch(_){}
+  const fmtF=sec=>pad2(Math.floor(sec/60))+':'+pad2(sec%60);
+  const paint=()=>{
+    const left=Math.max(0,Math.round((endAt-Date.now())/1000));
+    const running=left>0;
+    foTime.textContent=fmtF(running?left:LEN);
+    foState.textContent=running?'focusing':'ready';
+    foTog.textContent=running?'Pause':'Start 25 min';
+    if(foFill)foFill.style.width=(running?(1-left/LEN)*100:0)+'%';
+    return left;
+  };
+  window.focusToggle=on=>{
+    const left=Math.max(0,Math.round((endAt-Date.now())/1000));
+    if(on===undefined)on=!(left>0);
+    if(on&&left<=0){endAt=Date.now()+LEN*1000;showToast('Focus — 25 minutes. Eva will keep it quiet.')}
+    if(!on)endAt=0;
+    try{endAt?localStorage.setItem('tosse.focusEnd',String(endAt)):localStorage.removeItem('tosse.focusEnd')}catch(_){}
+    paint();
+  };
+  foTog.addEventListener('click',()=>window.focusToggle());
+  $w('#wFoReset').addEventListener('click',()=>{endAt=0;try{localStorage.removeItem('tosse.focusEnd')}catch(_){}paint();});
+  let wasLeft=paint();
+  setInterval(()=>{const l=paint();if(wasLeft>0&&l===0)showToast('Focus complete — take five ☕');wasLeft=l;},1000);
+}
+
+/* ── workspace tile: live mirror + tap to switch ── */
+const wsBtns=$w('#wWsBtns'),wsNameT=$w('#wWsName'),wsDescT=$w('#wWsDesc');
+if(wsBtns){
+  wsBtns.addEventListener('click',e=>{
+    const b=e.target.closest('[data-ws]');if(!b)return;
+    const n=+b.dataset.ws;if(n!==wsIndex)switchWorkspace(n-wsIndex);
+  });
+  setInterval(()=>{
+    wsBtns.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.ws===wsIndex));
+    if(wsNameT.textContent!==wsNames[wsIndex]){wsNameT.textContent=wsNames[wsIndex];wsDescT.textContent=wsDesc[wsIndex];}
+  },800);
 }
 
 /* ── performance tile: real measured numbers, not simulated ── */
