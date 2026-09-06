@@ -69,6 +69,202 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
 .rtsteps{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:8px 0 12px}
 .rtsteps label{display:flex;align-items:center;gap:7px;font-size:11.5px;color:rgba(255,255,255,.7);padding:6px 8px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
 .rtsteps input{accent-color:#7c9cff}
+
+
+/* ════════ ZenvX drop: bento home widgets + interaction juice ════════ */
+.stage{display:block;overflow-y:auto;overflow-x:hidden;padding:14px 18px 118px;scrollbar-width:thin}
+.bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(138px,auto));grid-auto-rows:minmax(138px,auto);gap:14px;max-width:1120px;margin:6px auto 0}
+.tile{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:20px;background:rgba(14,17,25,.62);backdrop-filter:blur(28px) saturate(130%);-webkit-backdrop-filter:blur(28px) saturate(130%);box-shadow:var(--shadow);padding:18px 20px;transition:transform .38s cubic-bezier(.16,1,.3,1),box-shadow .38s,border-color .38s}
+.tile:hover{transform:translateY(-4px);border-color:rgba(143,176,255,.38);box-shadow:0 26px 54px rgba(0,0,0,.42)}
+.tile:active{transform:translateY(-1px) scale(.992)}
+.tlabel{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:600}
+.tmini{margin-top:10px;align-self:flex-start;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#e8ecf6;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:100px;cursor:pointer;transition:background .2s,transform .18s cubic-bezier(.16,1,.3,1)}
+.tmini:hover{background:rgba(255,255,255,.12)}
+.tmini:active{transform:scale(.94)}
+
+/* entrance stagger */
+.bento.armed [data-tile]{opacity:0;transform:translateY(20px) scale(.965)}
+.bento.armed.in [data-tile]{opacity:1;transform:none;transition:opacity .68s cubic-bezier(.16,1,.3,1),transform .68s cubic-bezier(.16,1,.3,1)}
+
+/* welcome tile */
+.tile-welcome{grid-area:1/1/3/3;display:flex;flex-direction:column;justify-content:center}
+.tile-welcome h1{font-size:clamp(24px,2.5vw,36px);line-height:1.06;margin:10px 0 12px;letter-spacing:-.02em}
+.tile-welcome h1 span{background:linear-gradient(100deg,#8fb0ff,#68d6a2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tile-welcome .subtitle{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 18px;max-width:46ch}
+.tile-welcome .actions{display:flex;gap:10px;flex-wrap:wrap}
+.tile-welcome .actions .primary,.tile-welcome .actions .secondary{border-radius:100px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:transform .2s cubic-bezier(.16,1,.3,1),filter .2s,background .2s}
+.tile-welcome .actions .primary{background:#8fb0ff;color:#0b0f1a}
+.tile-welcome .actions .primary:hover{filter:brightness(1.1)}
+.tile-welcome .actions .secondary{background:rgba(255,255,255,.06);border-color:var(--line);color:#e8ecf6}
+.tile-welcome .actions .secondary:hover{background:rgba(255,255,255,.12)}
+.tile-welcome .actions button:active{transform:scale(.95)}
+.tile-welcome .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tile-welcome .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:livePulse 2.4s ease-in-out infinite}
+@keyframes livePulse{50%{opacity:.45;box-shadow:0 0 3px var(--ok)}}
+
+/* clock */
+.tile-clock{grid-area:1/3;display:flex;flex-direction:column;justify-content:center}
+.w-clocktime{font-size:clamp(34px,3.4vw,46px);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.w-clocktime .w-clocksec{font-size:.38em;font-weight:500;color:var(--muted);margin-left:8px;vertical-align:.5em}
+.w-clocksub{margin-top:10px;font-size:12px;color:var(--muted)}
+
+/* weather */
+.tile-weather{grid-area:1/4;display:flex;flex-direction:column}
+.w-wxrow{display:flex;align-items:center;gap:12px}
+.w-wxicon{font-size:30px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4))}
+.w-wxrow strong{font-size:34px;font-weight:700;letter-spacing:-.02em}
+.w-wxcond{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45}
+
+/* music */
+.tile-music{grid-area:2/3;display:flex;flex-direction:column}
+.w-murow{display:flex;align-items:center;gap:12px}
+.w-muart{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#4f7cff,#9d6bff);flex:none;box-shadow:0 6px 16px rgba(0,0,0,.35);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.tile-music:hover .w-muart{transform:rotate(-4deg) scale(1.04)}
+.w-mumeta{display:flex;flex-direction:column;min-width:0;flex:1}
+.w-mumeta b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-mumeta i{font-size:11.5px;color:var(--muted);font-style:normal}
+.w-muplay{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;cursor:pointer;font-size:12px;display:grid;place-items:center;transition:transform .2s cubic-bezier(.16,1,.3,1),background .2s}
+.w-muplay:hover{background:rgba(255,255,255,.14)}
+.w-muplay:active{transform:scale(.9)}
+.w-museek{margin-top:12px;height:4px;border-radius:4px;background:rgba(255,255,255,.09);overflow:hidden}
+.w-museek span{display:block;height:100%;width:0;background:linear-gradient(90deg,#8fb0ff,#68d6a2);border-radius:4px;transition:width .9s linear}
+
+/* calendar */
+.tile-cal{grid-area:2/4}
+.w-calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:10.5px;text-align:center}
+.w-calgrid .wd{color:var(--muted);font-weight:700;font-size:9px;letter-spacing:.08em;padding-bottom:4px}
+.w-calgrid .wdy{padding:3.5px 0;border-radius:6px;color:#cdd3e1;font-variant-numeric:tabular-nums}
+.w-calgrid .wdy.today{background:#8fb0ff;color:#0b0f1a;font-weight:700;box-shadow:0 0 12px rgba(143,176,255,.5)}
+
+/* eva */
+.tile-eva{grid-area:3/1;display:flex;flex-direction:column}
+.w-evarow{display:flex;align-items:center;gap:10px}
+.w-orb{width:16px;height:16px;border-radius:50%;background:#5a6478;box-shadow:0 0 0 0 rgba(143,176,255,.4);transition:background .3s}
+.w-orb[data-s="live"]{background:#68d6a2;animation:orbPulse 2.2s ease-out infinite}
+.w-orb[data-s="on"]{background:#8fb0ff;animation:orbPulse 1.1s ease-out infinite}
+@keyframes orbPulse{0%{box-shadow:0 0 0 0 rgba(143,176,255,.45)}100%{box-shadow:0 0 0 14px rgba(143,176,255,0)}}
+.w-evastate{font-size:13px;font-weight:600}
+.w-evalast{margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.5;min-height:2.9em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+
+/* sticky */
+.tile-note{grid-area:3/2;display:flex;flex-direction:column}
+.tile-note textarea{flex:1;resize:none;border:0;background:transparent;color:#f0e9c8;font:inherit;font-size:13px;line-height:1.55;outline:none;min-height:0}
+.tile-note textarea::placeholder{color:rgba(240,233,200,.4)}
+.tile-note{background:linear-gradient(160deg,rgba(84,74,28,.34),rgba(14,17,25,.62))}
+
+/* system telemetry */
+.tile-sys{grid-area:3/3/4/5}
+.w-sysrows{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-top:4px}
+.w-sysrow{display:flex;align-items:center;gap:10px;font-size:11px}
+.w-sysrow>span:first-child{width:52px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:10px}
+.w-sysrow b{font-variant-numeric:tabular-nums;font-size:11px;width:34px;text-align:right}
+.w-bar{flex:1;height:5px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
+.w-bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#68d6a2,#8fb0ff);width:20%;transition:width 1.1s cubic-bezier(.16,1,.3,1)}
+
+/* quick actions */
+.tile-actions{grid-area:4/1/5/3}
+.w-qagrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;height:calc(100% - 26px)}
+.w-qagrid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:18px;border:1px solid var(--line);background:rgba(255,255,255,.045);color:#e8ecf6;border-radius:14px;cursor:pointer;transition:transform .22s cubic-bezier(.16,1,.3,1),background .2s,border-color .2s}
+.w-qagrid button span{font-size:11px;font-weight:600}
+.w-qagrid button:hover{background:rgba(143,176,255,.14);border-color:rgba(143,176,255,.4);transform:translateY(-3px)}
+.w-qagrid button:active{transform:scale(.93)}
+
+/* checklist */
+.tile-check{grid-area:4/3/5/5}
+.w-check{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.w-check button{display:flex;align-items:center;gap:9px;background:none;border:0;color:#cdd3e1;font-size:12px;cursor:pointer;padding:4px 0;text-align:left;transition:color .25s}
+.w-check button i{width:15px;height:15px;border-radius:5px;border:1.5px solid var(--muted);flex:none;position:relative;transition:background .25s,border-color .25s}
+.w-check button.done{color:var(--muted);text-decoration:line-through}
+.w-check button.done i{background:var(--ok);border-color:var(--ok)}
+.w-check button.done i:after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid:#06251a;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.tile-check.all-done .tlabel{color:var(--ok)}
+.tile-check.all-done .tlabel:after{content:" · complete ✓"}
+
+/* touch + pinch bursts */
+.touch-ripple{position:fixed;z-index:199;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #8fb0ff;border-radius:50%;pointer-events:none;animation:burst .5s cubic-bezier(.16,1,.3,1) forwards}
+.touch-ripple.ring2{animation-duration:.72s;animation-delay:.07s;opacity:.6}
+.touch-ripple.pinch{border-color:var(--ok)}
+.touch-ripple.touch{border-color:#ffb86b}
+@keyframes burst{to{width:88px;height:88px;margin:-44px 0 0 -44px;opacity:0}}
+
+/* window spring in/out */
+.win.win-in{animation:winIn .4s cubic-bezier(.16,1,.3,1)}
+@keyframes winIn{from{opacity:0;transform:translateY(18px) scale(.93)}to{opacity:1;transform:none}}
+.win.win-out{animation:winOut .18s ease-in forwards}
+@keyframes winOut{to{opacity:0;transform:translateY(12px) scale(.94)}}
+.win.focus-pop{animation:focusPop .3s cubic-bezier(.16,1,.3,1)}
+@keyframes focusPop{40%{transform:scale(1.008)}}
+
+/* launcher/voice/gesture panel pop */
+.panel.open,#voice.open,#gesture.open{animation:panelIn .42s cubic-bezier(.16,1,.3,1)}
+@keyframes panelIn{from{opacity:0;transform:translate(-50%,12px) scale(.96)}}
+
+/* app icon bounce when its window opens */
+@keyframes iconBounce{0%{transform:scale(1)}35%{transform:translateY(-7px) scale(1.16)}65%{transform:scale(.93)}100%{transform:scale(1)}}
+.icon-bounce{animation:iconBounce .52s cubic-bezier(.16,1,.3,1)!important}
+
+/* tapped element pop (pinch + click) */
+@keyframes tapPop{0%{transform:scale(1)}40%{transform:scale(.93)}100%{transform:scale(1)}}
+.tap-pop{animation:tapPop .3s cubic-bezier(.16,1,.3,1)!important}
+
+/* dock magnification smoothing */
+.dock button{transition:transform .22s cubic-bezier(.16,1,.3,1),background .2s}
+
+/* desktop icons press */
+.desktop-icon{transition:transform .22s cubic-bezier(.16,1,.3,1)}
+.desktop-icon:active{transform:scale(.92)}
+
+/* topbar slides in once */
+.topbar{animation:barIn .6s cubic-bezier(.16,1,.3,1) .1s backwards}
+@keyframes barIn{from{transform:translateY(-100%);opacity:0}}
+
+/* welcome release note */
+.tile-welcome .rel{color:#8fb0ff;font-weight:600}
+
+/* gestures — live mirror of the hand engine */
+.tile-gest{grid-area:5/1/6/3;display:flex;flex-direction:column}
+.w-gestrow{display:flex;align-items:center;gap:10px}
+.w-gestpose{margin-top:10px;display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--muted)}
+.w-gestpose b{font-size:14px;color:#e8ecf6;font-weight:600}
+
+/* routines — run saved voice macros from home */
+.tile-routines{grid-area:5/3/6/4;display:flex;flex-direction:column}
+.w-rtlist{display:flex;flex-direction:column;gap:7px;min-height:0;flex:1;overflow:auto;scrollbar-width:thin}
+.w-rt{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:11px;padding:8px 10px;font-size:12px;color:#e8ecf6}
+.w-rt b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-rt button{flex:none;border:1px solid var(--line);background:rgba(143,176,255,.14);color:#cfe0ff;font-size:10.5px;font-weight:700;padding:5px 11px;border-radius:100px;cursor:pointer;transition:background .2s,transform .18s cubic-bezier(.16,1,.3,1)}
+.w-rt button:hover{background:rgba(143,176,255,.3)}
+.w-rt button:active{transform:scale(.93)}
+.w-rtempty{font-size:12px;color:var(--muted);line-height:1.55;margin:2px 0 8px}
+
+/* performance — real numbers */
+.tile-perf{grid-area:5/4/6/5;display:flex;flex-direction:column}
+.w-perfrows{display:grid;gap:8px;margin-top:2px}
+.w-perfrow{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.w-perfrow b{font-size:15px;color:#e8ecf6;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:0;text-transform:none}
+
+/* bento responsive */
+@media (max-width:1180px){
+  .bento{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:minmax(140px,auto)}
+  .tile-welcome{grid-area:auto/1/auto/3}
+  .tile-clock,.tile-weather,.tile-music,.tile-cal,.tile-eva,.tile-note{grid-area:auto}
+  .tile-sys{grid-area:auto/1/auto/3}
+  .tile-actions{grid-area:auto/1/auto/3}
+  .tile-check{grid-area:auto/1/auto/3}
+  .tile-gest{grid-area:auto/1/auto/3}
+  .tile-routines,.tile-perf{grid-area:auto}
+}
+@media (max-width:640px){
+  .bento{grid-template-columns:minmax(0,1fr)}
+  .tile-welcome,.tile-sys,.tile-actions,.tile-check,.tile-gest{grid-area:auto/1/auto/2}
+  .stage{padding:12px 12px 108px}
+}
+@media (prefers-reduced-motion:reduce){
+  .bento.armed [data-tile],.bento [data-tile]{opacity:1;transform:none}
+  .win.win-in,.win.win-out,.win.focus-pop,.topbar,.panel.open,#voice.open,#gesture.open{animation:none}
+  .touch-ripple{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -82,11 +278,104 @@ body{background:radial-gradient(circle at 78% 16%,rgba(124,156,255,.22),transpar
 <button class="desktop-icon" data-app="Settings"><span class="icon-tile"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M19 12a7 7 0 00-.1-1l2-1.5-2-3.4-2.4 1A8 8 0 0014.8 6l-.3-2.6h-4L10.2 6a8 8 0 00-1.7 1L6.1 6.1l-2 3.4 2 1.5a7 7 0 000 2L4 14.5l2 3.4 2.4-1a8 8 0 001.7 1l.3 2.6h4l.3-2.6a8 8 0 001.7-1l2.4 1 2-3.4-2-1.5a7 7 0 00.1-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></span>Settings</button>
 </nav>
 <section class="stage">
-<article class="welcome"><div class="hero"><div class="eyebrow"><span class="dot"></span>Concept experience · v0.1</div><h1>Computing that <span>listens & moves</span> with you.</h1><p class="subtitle">Meet Tosse OS — a Zorin-based desktop concept designed around natural voice, touch-free gestures, accessibility, and privacy-first control.</p><div class="actions"><button class="primary" data-action="voice">Try “Hey Eva”</button><button class="secondary" data-action="launcher">Explore the desktop</button></div></div><aside class="quick"><h2>Experience the highlights</h2>
-<button class="feature" data-action="voice"><span class="ficon"><svg viewBox="0 0 24 24" fill="none"><rect x="8" y="3" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>Voice-first assistant</strong><small>Launch, search and control in natural language.</small></span></button>
-<button class="feature" data-action="gesture"><span class="ficon"><svg viewBox="0 0 24 24" fill="none"><path d="M8 12V6.5a1.5 1.5 0 013 0V11m0-5.5a1.5 1.5 0 013 0V11m0-4.5a1.5 1.5 0 013 0V12m0-3.5a1.5 1.5 0 013 0V15c0 3.2-2.5 5.5-5.6 5.5H11c-2 0-3.5-1.1-4.6-2.7L4 14.4A1.5 1.5 0 016.4 13L8 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span><span><strong>Touch-free gestures</strong><small>Navigate, present and play without touching.</small></span></button>
-<button class="feature" data-app="Privacy"><span class="ficon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.8-2.9 8.1-7 10-4.1-1.9-7-5.2-7-10V6z" stroke="currentColor" stroke-width="1.7"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><strong>Private by design</strong><small>Clear sensor states and on-device-first choices.</small></span></button>
-</aside></article>
+  <div class="bento" id="bento">
+    <article class="tile tile-welcome" data-tile>
+      <div class="eyebrow"><span class="dot"></span>Concept experience · v0.2</div>
+      <h1>Computing that <span>listens &amp; moves</span> with you.</h1>
+      <p class="subtitle">Tosse OS — a Zorin-based desktop concept built around natural voice, touch-free gestures, accessibility, and privacy-first control. <span class="rel">1.0 ships January 7, 2027.</span></p>
+      <div class="actions">
+        <button class="primary" data-action="voice">Try “Hey Eva”</button>
+        <button class="secondary" data-action="launcher">Explore the desktop</button>
+      </div>
+    </article>
+
+    <article class="tile tile-clock" data-tile aria-label="Clock">
+      <div class="tlabel">Now</div>
+      <div class="w-clocktime"><span id="wClockTime">--:--</span><span class="w-clocksec" id="wClockSec">--</span></div>
+      <div class="w-clocksub" id="wClockDate">—</div>
+    </article>
+
+    <article class="tile tile-weather" data-tile aria-label="Weather">
+      <div class="tlabel">Sky · <span id="wWxCity">Kochi</span></div>
+      <div class="w-wxrow"><span class="w-wxicon" id="wWxIcon">🌤</span><strong id="wWxTemp">28°</strong></div>
+      <div class="w-wxcond" id="wWxCond">Partly cloudy · feels like 30°</div>
+      <button class="tmini" id="wWxNext" type="button">New reading</button>
+    </article>
+
+    <article class="tile tile-music" data-tile aria-label="Music">
+      <div class="tlabel">Now playing</div>
+      <div class="w-murow">
+        <span class="w-muart" id="wMuArt"></span>
+        <span class="w-mumeta"><b id="wMuTitle">—</b><i id="wMuArtist">—</i></span>
+        <button class="w-muplay" id="wMuPlay" type="button" aria-label="Play or pause">▶</button>
+      </div>
+      <div class="w-museek"><span id="wMuFill"></span></div>
+    </article>
+
+    <article class="tile tile-cal" data-tile aria-label="Calendar">
+      <div class="tlabel" id="wCalMonth">Month</div>
+      <div class="w-calgrid" id="wCalGrid"></div>
+    </article>
+
+    <article class="tile tile-eva" data-tile aria-label="Eva assistant">
+      <div class="tlabel">Eva</div>
+      <div class="w-evarow"><span class="w-orb" id="wEvaOrb" data-s="off"></span><span class="w-evastate" id="wEvaState">Idle — press Space</span></div>
+      <div class="w-evalast" id="wEvaLast">Say “help” to see what I can do.</div>
+      <button class="tmini" data-action="voice" type="button">Talk to Eva</button>
+    </article>
+
+    <article class="tile tile-note" data-tile aria-label="Sticky note">
+      <div class="tlabel">Sticky</div>
+      <textarea id="wNote" rows="4" placeholder="Jot something — it stays on this machine." aria-label="Sticky note"></textarea>
+    </article>
+
+    <article class="tile tile-sys" data-tile aria-label="System telemetry">
+      <div class="tlabel">Telemetry · simulated</div>
+      <div class="w-sysrows" id="wSys"></div>
+    </article>
+
+    <article class="tile tile-actions" data-tile aria-label="Quick actions">
+      <div class="tlabel">Quick actions</div>
+      <div class="w-qagrid">
+        <button data-action="voice" type="button">🎙 <span>Voice</span></button>
+        <button data-action="gesture" type="button">🖐 <span>Gestures</span></button>
+        <button data-app="Focus" type="button">🎯 <span>Focus</span></button>
+        <button data-app="Routines" type="button">⚡ <span>Routines</span></button>
+      </div>
+    </article>
+
+    <article class="tile tile-check" data-tile aria-label="Get started">
+      <div class="tlabel">Get started</div>
+      <ul class="w-check" id="wCheck">
+        <li><button type="button" data-k="voice"><i></i>Say a voice command</button></li>
+        <li><button type="button" data-k="pinch"><i></i>Pinch to click something</button></li>
+        <li><button type="button" data-k="pose"><i></i>Teach a pose in Pose Lab</button></li>
+        <li><button type="button" data-k="shot"><i></i>Take a ✌ screenshot</button></li>
+      </ul>
+    </article>
+
+    <article class="tile tile-gest" data-tile aria-label="Gesture engine — live">
+      <div class="tlabel">Gestures · live</div>
+      <div class="w-gestrow"><span class="w-orb" id="wGestDot" data-s="off"></span><span class="w-evastate" id="wGestState">Camera off</span></div>
+      <div class="w-gestpose"><span>Detected pose</span><b id="wGestPose">none</b></div>
+      <button class="tmini" data-action="gesture" type="button">Open gesture panel</button>
+    </article>
+
+    <article class="tile tile-routines" data-tile aria-label="Voice routines">
+      <div class="tlabel">Routines</div>
+      <div class="w-rtlist" id="wRtList"></div>
+    </article>
+
+    <article class="tile tile-perf" data-tile aria-label="Performance — real">
+      <div class="tlabel">Performance · real</div>
+      <div class="w-perfrows">
+        <div class="w-perfrow"><span>FPS</span><b id="wPerfFps">—</b></div>
+        <div class="w-perfrow"><span>Frame time</span><b id="wPerfFrame">—</b></div>
+        <div class="w-perfrow"><span>Uptime</span><b id="wPerfUp">—</b></div>
+        <div class="w-perfrow"><span>Windows open</span><b id="wPerfWin">0</b></div>
+      </div>
+    </article>
+  </div>
 </section></main>
 <div class="shortcut">Press <span class="kbd">Space</span> for Eva · <span class="kbd">G</span> for gestures · <span class="kbd">←→↑↓</span> + <span class="kbd">Enter</span> to point & click</div>
 <div class="dockwrap"><nav class="dock" aria-label="App dock">
@@ -1414,6 +1703,278 @@ APPDEF['Routines']={w:430,h:480,render(b){
     redraw();showToast('Routine saved — say “'+phrase+'”');
   });
 }};
+
+
+
+/* ════════ ZenvX drop: home widgets + interaction animations ════════ */
+(function(){
+'use strict';
+const $w=s=>document.querySelector(s);
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ── bento entrance stagger (after boot clears) ── */
+const bento=$w('#bento');
+if(bento){
+  bento.classList.add('armed');
+  [...bento.querySelectorAll('[data-tile]')].forEach((t,i)=>t.style.transitionDelay=(50+i*60)+'ms');
+  const show=()=>bento.classList.add('in');
+  if(document.body.contains(document.querySelector('#boot'))){
+    const mo=new MutationObserver(()=>{if(!document.body.contains(document.querySelector('#boot'))){mo.disconnect();setTimeout(show,320)}});
+    mo.observe(document.body,{childList:true,subtree:true});
+  }else setTimeout(show,320);
+}
+
+/* ── clock ── */
+const clkT=$w('#wClockTime'),clkD=$w('#wClockDate'),clkS=$w('#wClockSec');
+if(clkT){
+  const tick=()=>{const d=new Date();
+    clkT.textContent=pad2(d.getHours())+':'+pad2(d.getMinutes());
+    clkS.textContent=pad2(d.getSeconds());
+    clkD.textContent=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});};
+  tick();setInterval(tick,1000);
+}
+
+/* ── weather (simulated, same data as the Weather app) ── */
+if($w('#wWxNext')){
+  const wxNew=()=>{const c=pick(COND);const temp=Math.round(rnd(21,36)+c[2]);
+    $w('#wWxIcon').textContent=c[1];
+    $w('#wWxTemp').textContent=temp+'°';
+    $w('#wWxCond').textContent=c[0]+' · feels like '+Math.round(temp+rnd(-1,4))+'°';
+    $w('#wWxCity').textContent=pick(CITIES);};
+  wxNew();
+  $w('#wWxNext').addEventListener('click',wxNew);
+}
+
+/* ── music (simulated, same track list as the Music app) ── */
+const mPlay=$w('#wMuPlay');
+if(mPlay){
+  let tr=pick(TRACKS),pos=Math.floor(rnd(0,40)),on=false,tmr=null;
+  const art=$w('#wMuArt'),ti=$w('#wMuTitle'),ar=$w('#wMuArtist'),fill=$w('#wMuFill');
+  const paint=()=>{ti.textContent=tr[0];ar.textContent=tr[1]+' · '+tr[2];
+    art.style.background='linear-gradient(135deg,'+tr[4]+')';
+    fill.style.width=Math.min(100,pos/tr[3]*100)+'%';};
+  mPlay.addEventListener('click',()=>{on=!on;mPlay.textContent=on?'❚❚':'▶';
+    clearInterval(tmr);
+    if(on)tmr=setInterval(()=>{pos++;if(pos>=tr[3]){tr=pick(TRACKS.filter(x=>x[0]!==tr[0]));pos=0}paint()},1000);});
+  paint();
+}
+
+/* ── calendar ── */
+const calG=$w('#wCalGrid');
+if(calG){
+  const now=new Date(),y=now.getFullYear(),mo=now.getMonth();
+  $w('#wCalMonth').textContent=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const first=(new Date(y,mo,1).getDay()+6)%7,days=new Date(y,mo+1,0).getDate();
+  let h='';['M','T','W','T','F','S','S'].forEach(d=>h+='<span class="wd">'+d+'</span>');
+  for(let i=0;i<first;i++)h+='<span></span>';
+  for(let d=1;d<=days;d++)h+='<span class="wdy'+(d===now.getDate()?' today':'')+'">'+d+'</span>';
+  calG.innerHTML=h;
+}
+
+/* ── system telemetry (simulated random-walk bars) ── */
+const sysRows=$w('#wSys');
+if(sysRows){
+  const rows=[['CPU',34],['GPU',22],['Memory',58],['Network',12]];
+  sysRows.innerHTML=rows.map((r,i)=>'<div class="w-sysrow"><span>'+r[0]+'</span><span class="w-bar"><i id="wSysBar'+i+'"></i></span><b id="wSysVal'+i+'">'+r[1]+'%</b></div>').join('');
+  const vals=rows.map(r=>r[1]);
+  setInterval(()=>{rows.forEach((r,i)=>{
+    vals[i]=Math.max(4,Math.min(96,vals[i]+rnd(-9,9)));
+    const b=sysRows.querySelector('#wSysBar'+i),v=sysRows.querySelector('#wSysVal'+i);
+    if(b)b.style.width=vals[i]+'%';
+    if(v)v.textContent=Math.round(vals[i])+'%';});},1300);
+}
+
+/* ── sticky note (this device only) ── */
+const noteEl=$w('#wNote');
+if(noteEl){
+  try{noteEl.value=localStorage.getItem('tosse.sticky')||''}catch(_){}
+  noteEl.addEventListener('input',()=>{try{localStorage.setItem('tosse.sticky',noteEl.value)}catch(_){}});
+}
+
+/* ── get-started checklist (persisted) ── */
+const checkList=$w('#wCheck');
+let checkSaved={};
+function paintCheck(){
+  if(!checkList)return;
+  checkList.querySelectorAll('button').forEach(b=>b.classList.toggle('done',!!checkSaved[b.dataset.k]));
+  const left=checkList.querySelectorAll('button:not(.done)').length;
+  checkList.closest('.tile').classList.toggle('all-done',left===0);
+}
+function markCheck(k){
+  if(checkSaved[k])return;
+  checkSaved[k]=true;
+  try{localStorage.setItem('tosse.checklist',JSON.stringify(checkSaved))}catch(_){}
+  paintCheck();
+  if(checkList){const t=checkList.closest('.tile');t.classList.remove('tap-pop');void t.offsetWidth;t.classList.add('tap-pop');}
+}
+if(checkList){
+  try{checkSaved=JSON.parse(localStorage.getItem('tosse.checklist')||'{}')}catch(_){checkSaved={}}
+  checkList.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    checkSaved[b.dataset.k]=!checkSaved[b.dataset.k];
+    try{localStorage.setItem('tosse.checklist',JSON.stringify(checkSaved))}catch(_){}
+    paintCheck();
+  }));
+  paintCheck();
+}
+
+/* ── Eva tile: mirror wake-word state + last heard ── */
+const orb=$w('#wEvaOrb');
+if(orb){
+  setInterval(()=>{
+    const heardEl=$w('#heard'),heardTxt=heardEl?heardEl.textContent.trim():'';
+    const lastEl=$w('#wEvaLast');
+    if(heardTxt&&lastEl.textContent!=='“'+heardTxt+'”')lastEl.textContent='“'+heardTxt+'”';
+    const wake=$w('#wakeToggle'),wt=wake?wake.textContent:'';
+    const open=!!document.querySelector('#voice.open');
+    const state=open?'Listening…':/on/i.test(wt)?'Wake word live':'Idle — press Space';
+    const stEl=$w('#wEvaState');
+    if(stEl.textContent!==state)stEl.textContent=state;
+    orb.dataset.s=open?'on':(/on/i.test(wt)?'live':'off');
+  },900);
+  const heardEl=$w('#heard');
+  if(heardEl){
+    new MutationObserver(()=>{
+      const t=heardEl.textContent.toLowerCase();
+      if(t.trim()){markCheck('voice');if(t.includes('screenshot'))markCheck('shot');}
+    }).observe(heardEl,{childList:true,characterData:true,subtree:true});
+  }
+}
+
+/* ── global touch/mouse ripple ── */
+function burst(x,y,kind){
+  for(const extra of ['',' ring2']){
+    const r=document.createElement('span');
+    r.className='touch-ripple'+extra+(kind?' '+kind:'');
+    r.style.left=x+'px';r.style.top=y+'px';
+    document.body.appendChild(r);
+    setTimeout(()=>r.remove(),820);
+  }
+}
+window.burst=burst;
+addEventListener('pointerdown',e=>{
+  if(reduceMotion||(e.button!==undefined&&e.button!==0))return;
+  if(e.target.closest('#gestureCam,#skel'))return;
+  burst(e.clientX,e.clientY,e.pointerType==='touch'?'touch':'');
+},{passive:true});
+
+/* ── pinch release: burst + target pop + checklist ── */
+const _takeScreenshot=takeScreenshot;
+takeScreenshot=function(){markCheck('shot');return _takeScreenshot.apply(null,arguments)};
+const _gestureClick=gestureClick;
+gestureClick=function(){
+  burst(px,py,'pinch');
+  const t=pickAt(px,py);
+  if(t){t.classList.remove('tap-pop');void t.offsetWidth;t.classList.add('tap-pop');}
+  markCheck('pinch');
+  _gestureClick();
+};
+
+/* ── windows: spring in, shrink out, focus pop; icons bounce ── */
+const _openAppWindow=openAppWindow;
+openAppWindow=function(name){
+  const ex=openWins.get(name);
+  if(ex)ex.el.classList.remove('win-out');   /* cancel a pending close-out on quick reopen */
+  const rec=_openAppWindow(name);
+  if(rec&&rec.el){
+    rec.el.classList.add('win-in');
+    rec.el.addEventListener('animationend',()=>rec.el.classList.remove('win-in'),{once:true});
+    document.querySelectorAll('[data-app="'+name+'"]').forEach(ic=>{
+      ic.classList.remove('icon-bounce');void ic.offsetWidth;ic.classList.add('icon-bounce');
+    });
+    if(name==='Pose Lab')markCheck('pose');
+  }
+  return rec;
+};
+const _closeAppWindow=closeAppWindow;
+closeAppWindow=function(name){
+  const w=openWins.get(name);
+  if(!w){_closeAppWindow(name);return;}
+  const el=w.el;
+  el.classList.remove('win-in');
+  el.classList.add('win-out');
+  /* 65ms: a visible shrink-pop that still beats the window manager's
+     usual 80ms close check; the element identity guard keeps a quick
+     reopen of the same app from being closed by a stale timer. */
+  setTimeout(()=>{const cur=openWins.get(name);if(cur&&cur.el===el)_closeAppWindow(name);},65);
+};
+const _focusWindow=focusWindow;
+focusWindow=function(name){
+  _focusWindow(name);
+  const w=openWins.get(name);
+  if(w&&!w.el.classList.contains('win-in')){w.el.classList.remove('focus-pop');void w.el.offsetWidth;w.el.classList.add('focus-pop');}
+};
+
+/* ── dock magnification ── */
+const dock=document.querySelector('.dock');
+if(dock&&matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  dock.addEventListener('pointermove',e=>{
+    dock.querySelectorAll('button').forEach(b=>{
+      const r=b.getBoundingClientRect();
+      const d=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2));
+      const s=Math.max(1,1.3-d/240);
+      b.style.transform='translateY('+(-(s-1)*24).toFixed(1)+'px) scale('+s.toFixed(3)+')';
+    });
+  });
+  dock.addEventListener('pointerleave',()=>dock.querySelectorAll('button').forEach(b=>b.style.transform=''));
+}
+
+/* ── gestures tile: live mirror of the hand engine ── */
+const gDotT=$w('#wGestDot'),gStateT=$w('#wGestState'),gPoseT=$w('#wGestPose');
+if(gDotT&&gStateT){
+  setInterval(()=>{
+    const cam=document.querySelector('#gestureCam');
+    const camOn=!!(cam&&cam.srcObject);
+    const st=(document.querySelector('#gStatus')||{}).textContent||'';
+    const paused=/paused/i.test(st);
+    gStateT.textContent=paused?'Pointer frozen — palm held':(camOn?'Camera live — tracking':'Camera off');
+    gDotT.dataset.s=paused?'on':(camOn?'live':'off');
+    if(gPoseT){const p2=(document.querySelector('#gPose')||{}).textContent||'none';if(gPoseT.textContent!==p2)gPoseT.textContent=p2;}
+  },700);
+}
+
+/* ── routines tile: run saved voice macros straight from home ── */
+const rtList=$w('#wRtList');
+if(rtList){
+  let rtCache='';
+  const paintRts=()=>{
+    const list=loadMacros();
+    const key=JSON.stringify(list.map(m=>m.phrase));
+    if(key===rtCache)return;
+    rtCache=key;
+    if(!list.length){
+      rtList.innerHTML='<p class="w-rtempty">No routines yet — one phrase that runs a chain of commands.</p>'
+        +'<button class="tmini" id="wRtNew" type="button">Create one</button>';
+      return;
+    }
+    rtList.innerHTML=list.slice(0,4).map((m,i)=>'<div class="w-rt"><b>“'+m.phrase+'”</b><button type="button" data-rt="'+i+'">Run</button></div>').join('');
+  };
+  paintRts();
+  setInterval(paintRts,2500);
+  rtList.addEventListener('click',e=>{
+    if(e.target.closest('#wRtNew')){openAppWindow('Routines');return;}
+    const b=e.target.closest('[data-rt]');if(!b)return;
+    const m=loadMacros()[+b.dataset.rt];if(!m)return;
+    showToast('Running routine: '+m.phrase);
+    m.steps.forEach((st2,i)=>setTimeout(()=>runCommand(st2),900*(i+1)));
+  });
+}
+
+/* ── performance tile: real measured numbers, not simulated ── */
+const perfFps=$w('#wPerfFps');
+if(perfFps){
+  const t0=performance.now();
+  let frames=0,lastT=performance.now(),fps=0,ft=0;
+  const loop=t=>{frames++;if(t-lastT>=500){fps=Math.round(frames*1000/(t-lastT));ft=(t-lastT)/frames;frames=0;lastT=t;}requestAnimationFrame(loop);};
+  requestAnimationFrame(loop);
+  setInterval(()=>{
+    perfFps.textContent=fps;
+    const fEl=$w('#wPerfFrame');if(fEl)fEl.textContent=ft.toFixed(1)+' ms';
+    const up=Math.floor((performance.now()-t0)/1000);
+    const upEl=$w('#wPerfUp');if(upEl)upEl.textContent=pad2(Math.floor(up/60))+':'+pad2(up%60);
+    const wEl=$w('#wPerfWin');if(wEl)wEl.textContent=openWins.size;
+  },1000);
+}
+})();
 
 /* ── offline PWA shell ─────────────────────────────────────── */
 if('serviceWorker' in navigator){
